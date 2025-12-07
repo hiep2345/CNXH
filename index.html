@@ -71,14 +71,41 @@
             border-color: #d32f2f !important;
             font-weight: 600;
         }
-        #progress {
+        #progress-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 10px;
+        }
+        #progress {
             font-size: 1em;
             color: #e0e0e0;
             font-style: italic;
-            text-align: right;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding-top: 10px;
+            flex-grow: 1;
+        }
+        #navigation {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-button {
+            padding: 8px 15px;
+            background-color: #8a3a98; /* Tím đậm hơn cho nút */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+        .nav-button:hover {
+            background-color: #6d2e78;
+        }
+        .nav-button:disabled {
+            background-color: #555555;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
         #result {
             font-size: 1.5em;
@@ -110,7 +137,14 @@
 <div id="quiz-container" tabindex="0" aria-live="polite" aria-atomic="true" role="region">
     <div id="question">Đang tải câu hỏi...</div>
     <div id="answers"></div>
-    <div id="progress"></div>
+    
+    <div id="progress-area">
+        <div id="progress"></div>
+        <div id="navigation">
+            <button id="prev-button" class="nav-button" onclick="goToPreviousQuestion()">Câu Trước</button>
+            <button id="next-button" class="nav-button" onclick="goToNextQuestion()">Câu Sau</button>
+        </div>
+    </div>
     <div id="result" aria-live="assertive"></div>
 </div>
 
@@ -1760,7 +1794,7 @@
         }
     ];
 
-    let currentQuestionIndex = 0;
+let currentQuestionIndex = 0;
     let score = 0;
     let answered = false;
     let autoNextTimeout = null;
@@ -1772,8 +1806,25 @@
     const quizContainer = document.getElementById('quiz-container');
     const soundCorrect = document.getElementById("sound-correct");
     const soundWrong = document.getElementById("sound-wrong");
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
 
     const optionKeys = ['A', 'B', 'C', 'D'];
+
+    /**
+     * Cập nhật trạng thái của các nút điều hướng
+     */
+    const updateNavigationButtons = () => {
+        // Nút Câu Trước
+        prevButton.disabled = (currentQuestionIndex === 0);
+
+        // Nút Câu Sau: Luôn BẬT nếu chưa phải câu cuối
+        if (currentQuestionIndex < quizData.length - 1) {
+            nextButton.disabled = false;
+        } else {
+            nextButton.disabled = true; // Luôn tắt ở câu cuối
+        }
+    };
 
     /**
      * Tải và hiển thị câu hỏi hiện tại
@@ -1784,6 +1835,9 @@
         resultEl.innerText = '';
         answersEl.innerHTML = '';
         quizContainer.focus();
+        
+        // Vô hiệu hóa listener click bất kỳ vùng nào (Auto-next khi click chỉ hoạt động sau khi answered = true)
+        answersEl.onclick = null; 
 
         const currentData = quizData[currentQuestionIndex];
         
@@ -1791,22 +1845,28 @@
         questionEl.innerText = `Câu ${currentQuestionIndex + 1}: ${currentData.question}`;
         progressEl.innerText = `Câu ${currentQuestionIndex + 1} / ${quizData.length}`;
 
+        // Cập nhật trạng thái nút điều hướng (Luôn cho phép chuyển tiếp)
+        updateNavigationButtons(); 
+
         // Hiển thị các tùy chọn trả lời
         currentData.options.forEach(option => {
-            // Chuẩn hóa key (a, b, c, d -> A, B, C, D)
             const key = option.key.toUpperCase(); 
 
             const btn = document.createElement('div');
             btn.classList.add('answer-option', `answer-${key}`);
-            btn.setAttribute('tabindex', 0); // Có thể focus bằng phím
+            btn.setAttribute('tabindex', 0);
             btn.setAttribute('role', 'button');
 
             btn.innerHTML = `<span class="answer-label">${key}</span> ${option.text}`;
 
-            btn.onclick = () => selectAnswer(btn, key);
+            btn.onclick = (e) => {
+                e.stopPropagation(); 
+                selectAnswer(btn, key);
+            };
             btn.onkeydown = (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
+                    e.stopPropagation();
                     selectAnswer(btn, key);
                 }
             };
@@ -1822,7 +1882,6 @@
         if (answered) return;
         answered = true;
 
-        // Vô hiệu hóa tất cả các tùy chọn khác
         const allOptions = document.querySelectorAll('.answer-option');
         allOptions.forEach(opt => opt.style.pointerEvents = 'none');
 
@@ -1832,7 +1891,6 @@
             btn.classList.add('correct');
             score++;
             
-            // 🔊 Âm thanh đúng
             if (soundCorrect) {
                 soundCorrect.currentTime = 0;
                 soundCorrect.play();
@@ -1840,13 +1898,11 @@
         } else {
             btn.classList.add('wrong');
             
-            // 🔊 Âm thanh sai
             if (soundWrong) {
                 soundWrong.currentTime = 0;
                 soundWrong.play();
             }
 
-            // Tô màu đáp án đúng
             allOptions.forEach(opt => {
                 const label = opt.querySelector('.answer-label');
                 if (label && label.innerText.trim() === correctKey) {
@@ -1855,34 +1911,47 @@
             });
         }
 
-        resultEl.innerText = 'Nhấn **Enter** hoặc **Space** để sang câu tiếp theo...';
+        resultEl.innerText = 'Tự động chuyển câu sau 5 giây. Click bất kì đâu hoặc nhấn Enter/Space/Câu Sau để tiếp tục...';
 
-        // Tự động chuyển câu sau 2 giây (có thể bị chặn bởi clearTimeout bên dưới)
-        // autoNextTimeout = setTimeout(goToNextQuestion, 2000);
+        // Tự động chuyển câu sau 5 giây (chỉ áp dụng nếu chưa phải câu cuối)
+        if (currentQuestionIndex < quizData.length - 1) {
+            autoNextTimeout = setTimeout(goToNextQuestion, 5000);
+        }
+
+        // Cho phép click bất kỳ vùng nào trong answersEl để chuyển câu
+        answersEl.onclick = goToNextQuestion; 
+        
+        // Nút Câu Sau đã tự động bật vì hàm updateNavigationButtons được gọi ở loadQuestion và không còn bị disabled
     };
 
     /**
      * Chuyển sang câu hỏi tiếp theo
      */
     const goToNextQuestion = () => {
-        clearTimeout(autoNextTimeout);
-        if (currentQuestionIndex < quizData.length - 1) {
-            currentQuestionIndex++;
-            loadQuestion();
-        } else {
+        // Kiểm tra xem có phải câu cuối chưa (dù đã trả lời hay chưa)
+        if (currentQuestionIndex >= quizData.length - 1) {
             showResult();
+            return;
         }
+
+        clearTimeout(autoNextTimeout);
+        answersEl.onclick = null; 
+
+        currentQuestionIndex++;
+        loadQuestion();
     };
 
     /**
      * Quay lại câu hỏi trước đó
      */
     const goToPreviousQuestion = () => {
+        if (currentQuestionIndex === 0) return;
+
         clearTimeout(autoNextTimeout);
-        if (currentQuestionIndex > 0) {
-            currentQuestionIndex--;
-            loadQuestion();
-        }
+        answersEl.onclick = null; 
+
+        currentQuestionIndex--;
+        loadQuestion();
     };
 
     /**
@@ -1892,6 +1961,8 @@
         questionEl.innerText = '🎉 Hoàn thành Bài Quiz!';
         answersEl.innerHTML = '';
         progressEl.innerText = `Điểm cuối cùng: ${score} / ${quizData.length}`;
+        nextButton.disabled = true; // Tắt nút sau khi hoàn thành
+        prevButton.disabled = false;
         
         let message = `Bạn đã hoàn thành bài quiz! Điểm của bạn là **${score} / ${quizData.length}**.`;
         if (score === quizData.length) {
@@ -1907,10 +1978,14 @@
 
     // --- XỬ LÝ SỰ KIỆN BÀN PHÍM TOÀN CỤC ---
     quizContainer.addEventListener('keydown', (e) => {
+        // Cho phép chuyển câu SAU KHI TRẢ LỜI bằng Enter/Space (Auto-next)
         if ((e.key === 'Enter' || e.key === ' ') && answered) {
             e.preventDefault();
             goToNextQuestion();
-        } else if (e.key === 'ArrowRight') {
+        } 
+        
+        // Cho phép chuyển câu LUÔN LUÔN bằng ArrowRight/ArrowLeft (Dù đã trả lời hay chưa)
+        else if (e.key === 'ArrowRight') {
             e.preventDefault();
             goToNextQuestion();
         } else if (e.key === 'ArrowLeft') {
@@ -1925,7 +2000,7 @@
                 e.preventDefault();
                 const options = document.querySelectorAll('.answer-option');
                 if (options[keyIndex]) {
-                    options[keyIndex].click(); // Giả lập click để chọn đáp án
+                    options[keyIndex].click(); 
                 }
             }
         }
