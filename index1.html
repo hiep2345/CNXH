@@ -1,0 +1,3454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz CHỦ NGHĨA XÃ HỘI CHƯƠNG 4 - CHƯƠNG 7 - Nền Tím Pastel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: #400848; /* Tím đậm */
+            color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        #quiz-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 20px 0;
+            background: #b753c6; /* Tím pastel */
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            outline: none;
+            transition: box-shadow 0.3s;
+        }
+        #question {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #fff; /* Chữ trắng để nổi bật trên nền tím */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .answer-option {
+            background-color: #ffffff; /* Nền trắng mặc định */
+            color: #000000;
+            padding: 15px 20px;
+            margin-bottom: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 1.05em;
+            font-weight: 500;
+            border: 2px solid transparent;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.1s;
+            display: flex;
+            align-items: flex-start;
+        }
+        .answer-option:hover {
+            transform: translateY(-2px);
+            filter: brightness(0.98);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .answer-option:focus {
+            outline: none;
+            border-color: #ffcc00;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+        }
+        .correct {
+            background-color: #4CAF50 !important; /* Xanh lá */
+            color: white !important;
+            border-color: #388e3c !important;
+            font-weight: 600;
+        }
+        .wrong {
+            background-color: #f44336 !important; /* Đỏ */
+            color: white !important;
+            border-color: #d32f2f !important;
+            font-weight: 600;
+        }
+        #progress {
+            margin-top: 25px;
+            font-size: 1em;
+            color: #e0e0e0;
+            font-style: italic;
+            text-align: right;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 10px;
+        }
+        #result {
+            font-size: 1.5em;
+            font-weight: 800;
+            color: #ffcc00; /* Vàng sáng */
+            text-align: center;
+            margin-top: 35px;
+            padding: 15px 0;
+            border-top: 2px solid #ffcc00;
+        }
+        .answer-label {
+            font-weight: 800;
+            margin-right: 15px;
+            min-width: 25px;
+            text-align: center;
+            padding: 0 5px;
+        }
+        /* Color themes for options (optional but retained for style) */
+        .answer-A { border-left: 5px solid #007bff; }
+        .answer-B { border-left: 5px solid #28a745; }
+        .answer-C { border-left: 5px solid #ffc107; }
+        .answer-D { border-left: 5px solid #dc3545; }
+    </style>
+</head>
+<audio id="sound-correct" src="correct.mp3" preload="auto"></audio>
+<audio id="sound-wrong" src="wrong.mp3" preload="auto"></audio>
+<body>
+
+<div id="quiz-container" tabindex="0" aria-live="polite" aria-atomic="true" role="region">
+    <div id="question">Đang tải câu hỏi...</div>
+    <div id="answers"></div>
+    <div id="progress"></div>
+    <div id="result" aria-live="assertive"></div>
+</div>
+
+<script>
+    // --- DỮ LIỆU CÂU HỎI ĐÃ CHUẨN HÓA ---
+    // Đảm bảo tất cả các options đều là mảng các đối tượng có key và text.
+    const quizData = [
+  {
+    "number": 1,
+    "id": 294047478,
+    "question": "Thuật ngữ dân chủ ra đời vào thế kỷ nào?",
+    "options": [
+      {"key": "A", "text": "Thế kỷ thứ VII - VI TCN"},
+      {"key": "B", "text": "Thế kỷ thứ VIII - VII TCN"},
+      {"key": "C", "text": "Thế kỷ thứ IX - VIII TCN"},
+      {"key": "D", "text": "Thế kỷ thứ VI - V TCN"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 2,
+    "id": 294047479,
+    "question": "Các nhà tư tưởng ở đâu đã dùng cụm từ “demokratos” để nói đến dân chủ?",
+    "options": [
+      {"key": "A", "text": "Trung Quốc"},
+      {"key": "B", "text": "Ấn Độ"},
+      {"key": "C", "text": "Nga"},
+      {"key": "D", "text": "Hy Lạp"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 3,
+    "id": 294047480,
+    "question": "Dân chủ là gì?",
+    "options": [
+      {"key": "A", "text": "Nhân dân cai trị"},
+      {"key": "B", "text": "Quyền lực của nhân dân"},
+      {"key": "C", "text": "Quyền lực thuộc về nhân dân"},
+      {"key": "D", "text": "Tất cả các đáp án trên"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 4,
+    "id": 294047481,
+    "question": "Theo quan niệm của chủ nghĩa Mác - Lênin, dân chủ là:",
+    "options": [
+      {"key": "A", "text": "Thành quả của quá trình đấu tranh giai cấp cho những giá trị tiến bộ của nhân loại"},
+      {"key": "B", "text": "Một hình thức tổ chức nhà nước của giai cấp cầm quyền"},
+      {"key": "C", "text": "Một trong những nguyên tắc hoạt động của các tổ chức chính trị- xã hội"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 5,
+    "id": 294047482,
+    "question": "Điền từ thích hợp vào chỗ trống: “Về phương diện quyền lực, dân chủ là …”",
+    "options": [
+      {"key": "A", "text": "Quyền lực thuộc về giai cấp tư sản"},
+      {"key": "B", "text": "Quyền lực thuộc về giai cấp công nhân"},
+      {"key": "C", "text": "Quyền lực thuộc về nhân dân"},
+      {"key": "D", "text": "Quyền lực thuộc về giai cấp chủ nô"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 6,
+    "id": 294047483,
+    "question": "Quyền lợi căn bản nhất của nhân dân chính là:",
+    "options": [
+      {"key": "A", "text": "Quyền lực nhà nước thuộc sở hữu của giai cấp công nhân"},
+      {"key": "B", "text": "Quyền lực nhà nước thuộc sở hữu của nhân dân, của xã hội"},
+      {"key": "C", "text": "Quyền lực nhà nước thuộc sở hữu của giai cấp tư sản"},
+      {"key": "D", "text": "Quyền lực nhà nước thuộc sở hữu của giai cấp chủ nô"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 7,
+    "id": 294047484,
+    "question": "Khi nào mới có thể đảm bảo về căn bản việc nhân dân được hưởng quyền làm chủ với tư cách là một quyền lợi:",
+    "options": [
+      {"key": "A", "text": "Chỉ khi mọi quyền lực nhà nước thuộc về nhân dân"},
+      {"key": "B", "text": "Giai cấp công nhân lật đổ giai cấp tư sản"},
+      {"key": "C", "text": "Giai cấp tư sản giành được chính quyền"},
+      {"key": "D", "text": "Giai cấp nông dân giành được chính quyền"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 8,
+    "id": 294047485,
+    "question": "Điền từ thích hợp vào chỗ trống: “Trên phương diện chế độ xã hội và trong lĩnh vực chính trị, dân chủ là…”",
+    "options": [
+      {"key": "A", "text": "Một hình thức chính đảng"},
+      {"key": "B", "text": "Một hình thái nhà nước"},
+      {"key": "C", "text": "Một nguyên tắc dân chủ"},
+      {"key": "D", "text": "Một nguyên tắc quản lý xã hội"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 9,
+    "id": 294047486,
+    "question": "Chọn đáp án đúng nhất về dân chủ?",
+    "options": [
+      {"key": "A", "text": "Là quyền lực thuộc về giai cấp công nhân"},
+      {"key": "B", "text": "Là quyền lực thuộc về giai cấp tư sản"},
+      {"key": "C", "text": "Là quyền lực thuộc về nhân dân"},
+      {"key": "D", "text": "Là quyền lực thuộc về giai cấp nông dân"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 10,
+    "id": 294047487,
+    "question": "Chọn đáp án sai",
+    "options": [
+      {"key": "A", "text": "Dân chủ là nguyên tắc dân chủ"},
+      {"key": "B", "text": "Dân chủ là một hình thái nhà nước"},
+      {"key": "C", "text": "Dân chủ là quyền lực thuộc về nhân dân"},
+      {"key": "D", "text": "Dân chủ là quyền lực thuộc về thiểu số"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 11,
+    "id": 294047488,
+    "question": "Trên phương diện tổ chức và quản lý xã hội, dân chủ là:",
+    "options": [
+      {"key": "A", "text": "Chế độ dân chủ"},
+      {"key": "B", "text": "Không có đáp án đúng"},
+      {"key": "C", "text": "Một hình thái nhà nước"},
+      {"key": "D", "text": "Một nguyên tắc dân chủ"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 12,
+    "id": 294047489,
+    "question": "Với tư cách là một hình thức tổ chức thiết chế chính trị, một hình thái nhà nước, dân chủ là:",
+    "options": [
+      {"key": "A", "text": "Một phạm trù lịch sử"},
+      {"key": "B", "text": "Một phạm trù vĩnh viễn"},
+      {"key": "C", "text": "Một phạm trù giai cấp"},
+      {"key": "D", "text": "Một phạm trù triết học"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 13,
+    "id": 294047490,
+    "question": "Với tư cách là một giá trị xã hội, dân chủ là:",
+    "options": [
+      {"key": "A", "text": "Một phạm trù lịch sử"},
+      {"key": "B", "text": "Một phạm trù vĩnh viễn"},
+      {"key": "C", "text": "Một phạm trù chính trị"},
+      {"key": "D", "text": "Một phạm trù triết họC"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 14,
+    "id": 294047491,
+    "question": "Câu “Nước ta là nước dân chủ, địa vị cao nhất là dân, vì dân là chủ” là của ai?",
+    "options": [
+      {"key": "A", "text": "V.I.Lênin"},
+      {"key": "B", "text": "C. Mác"},
+      {"key": "C", "text": "Ph. Ăngghen"},
+      {"key": "D", "text": "Hồ Chí Minh"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 15,
+    "id": 294047492,
+    "question": "Theo Hồ Chí Minh, dân chủ là:",
+    "options": [
+      {"key": "A", "text": "Một giá trị nhân loại chung, là một thể chế chính trị, một chế độ xã hội"},
+      {"key": "B", "text": "Quyền lực thuộc về thiểu số"},
+      {"key": "C", "text": "Phạm trù vĩnh viễn"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 16,
+    "id": 294047493,
+    "question": "Dân chủ trong hai lĩnh vực nào là quan trọng hàng đầu và nổi bật nhất?",
+    "options": [
+      {"key": "A", "text": "Chính trị và văn hóa"},
+      {"key": "B", "text": "Chính trị và xã hội"},
+      {"key": "C", "text": "Văn hóa và xã hội"},
+      {"key": "D", "text": "Kinh tế và chính trị"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 17,
+    "id": 294047494,
+    "question": "Quan điểm “Phải quán triệt tư tưởng “lấy dân làm gốc”, xây dựng và phát huy quyền làm chủ của nhân dân lao động” là của ai?",
+    "options": [
+      {"key": "A", "text": "V.I.Lênin"},
+      {"key": "B", "text": "C.Mác"},
+      {"key": "C", "text": "Đảng Cộng sản Việt Nam"},
+      {"key": "D", "text": "Ph. Ăngghen"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 18,
+    "id": 294047495,
+    "question": "Hình thức dân chủ gắn với chế độ cộng sản nguyên thủy:",
+    "options": [
+      {"key": "A", "text": "Dân chủ chủ nô"},
+      {"key": "B", "text": "Dân chủ quân sự"},
+      {"key": "C", "text": "Dân chủ tư sản"},
+      {"key": "D", "text": "Dân chủ xã hội chủ nghĩa"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 19,
+    "id": 294047496,
+    "question": "Hình thức dân chủ gắn với chế độ chiếm hữu nô lệ:",
+    "options": [
+      {"key": "A", "text": "Dân chủ quân sự"},
+      {"key": "B", "text": "Dân chủ tư sản"},
+      {"key": "C", "text": "Dân chủ chủ nô"},
+      {"key": "D", "text": "Dân chủ xã hội chủ nghĩa"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 20,
+    "id": 294047497,
+    "question": "Hình thức dân chủ gắn với chế độ tư bản chủ nghĩa:",
+    "options": [
+      {"key": "A", "text": "Dân chủ quân sự"},
+      {"key": "B", "text": "Dân chủ chủ nô"},
+      {"key": "C", "text": "Dân chủ tư sản"},
+      {"key": "D", "text": "Dân chủ xã hội chủ nghĩa"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 21,
+    "id": 294047498,
+    "question": "Hình thức dân chủ gắn với chế độ xã hội chủ nghĩa:",
+    "options": [
+      {"key": "A", "text": "Dân chủ quân sự"},
+      {"key": "B", "text": "Dân chủ chủ nô"},
+      {"key": "C", "text": "Dân chủ tư sản"},
+      {"key": "D", "text": "Dân chủ xã hội chủ nghĩa"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 22,
+    "id": 294047499,
+    "question": "Hình thức dân chủ được xây dựng trên nền tảng kinh tế là chế độ tư hữu về tư liệu sản xuất:",
+    "options": [
+      {"key": "A", "text": "Dân chủ quân sự"},
+      {"key": "B", "text": "Dân chủ tư sản"},
+      {"key": "C", "text": "Tất cả các đáp án"},
+      {"key": "D", "text": "Dân chủ xã hội chủ nghĩa"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 23,
+    "id": 294047500,
+    "question": "Với tư cách là một hình thái nhà nước, một chế độ chính trị thì trong lịch sử nhân loại có những nền dân chủ nào?",
+    "options": [
+      {"key": "A", "text": "Nền dân chủ quân sự, nền dân chủ chủ nô, nền chuyên chếphong kiến"},
+      {"key": "B", "text": "Nền dân chủ quân sự, nền dân chủ phong kiến, nền dân chủ xã hội chủ nghĩa"},
+      {"key": "C", "text": "Nền dân chủ chủ nô, nền dân chủ phong kiến, nền dân chủ tư sản, nền dân chủ xã hội chủ nghĩa"},
+      {"key": "D", "text": "Nền dân chủ quân sự, nền dân chủ tư sản, nền dân chủ xã hội chủ nghĩa"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 24,
+    "id": 294047501,
+    "question": "Nền dân chủ tư sản xuất hiện khinào:",
+    "options": [
+      {"key": "A", "text": "Cuối thế kỷ XII, đầu thế kỷ XIII"},
+      {"key": "B", "text": "Cuối thế kỷ XIV, đầu thế kỷ XV"},
+      {"key": "C", "text": "Cuối thế kỷ XVI, đầu thế kỷ XVII"},
+      {"key": "D", "text": "Cuối thế kỷ XVII, đầu thế kỷ XVIII"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 25,
+    "id": 294047502,
+    "question": "Đặc trưng cơ bản của dân chủ quân sự:",
+    "options": [
+      {"key": "A", "text": "Nhân dân bầu ra thủ lĩnh quân sự thông qua Đại hội nhân dân"},
+      {"key": "B", "text": "Dân tham gia bầu ra Nhà nước"},
+      {"key": "C", "text": "Được xây dựng trên nền tảng kinh tế là chế độ tư hữu về tư liệu sản xuất"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 26,
+    "id": 294047503,
+    "question": "Đặc trưng cơ bản của nền dân chủ chủ nô:",
+    "options": [
+      {"key": "A", "text": "Nhân dân bầu ra thủ lĩnh quân sự thông qua Đại hội nhân dân"},
+      {"key": "B", "text": "Dân (chủ nô và công dân tự do) tham gia bầu ra Nhà nước"},
+      {"key": "C", "text": "Được xây dựng trên nền tảng kinh tế là chế độ công hữu về tư liệu sản xuất"},
+      {"key": "D", "text": "Thực hiện quyền lực của đại đa số nhân dân"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 27,
+    "id": 294047504,
+    "question": "Đặc trưng cơ bản của nền dân chủ tư sản",
+    "options": [
+      {"key": "A", "text": "Nhân dân bầu ra thủ lĩnh quân sự thông qua Đại hội nhân dân"},
+      {"key": "B", "text": "Dân (chủ nô và công dân tự do) tham gia bầu ra Nhà nước"},
+      {"key": "C", "text": "Được xây dựng trên nền tảng kinh tế là chế độ tư hữu về tư liệu sản xuất"},
+      {"key": "D", "text": "Thực hiện quyền lực của đại đa số nhân dân"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 28,
+    "id": 294047505,
+    "question": "Đặc trưng cơ bản của nền dân chủ xã hội chủ nghĩa",
+    "options": [
+      {"key": "A", "text": "Nhân dân bầu ra thủ lĩnh quân sự thông qua Đại hội nhân dân"},
+      {"key": "B", "text": "Dân (chủ nô và công dân tự do) tham gia bầu ra Nhà nước"},
+      {"key": "C", "text": "Được xây dựng trên nền tảng kinh tế là chế độ tư hữu về tư liệu sản xuất"},
+      {"key": "D", "text": "Thực hiện quyền lực của đại đa số nhân dân"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 29,
+    "id": 294047506,
+    "question": "Quan điểm “Dân chủ là dân là chủ và dân làm chủ” là của ai?",
+    "options": [
+      {"key": "A", "text": "Hồ Chí Minh"},
+      {"key": "B", "text": "V.I. Lênin"},
+      {"key": "C", "text": "C. Mác"},
+      {"key": "D", "text": "Ph. Ăngghen"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 30,
+    "id": 294047507,
+    "question": "Nền dân chủ xã hội chủ nghĩa chính thức được xác lập từ khi nào?",
+    "options": [
+      {"key": "A", "text": "Sau cuộc đấu tranh giai cấp ở Pháp"},
+      {"key": "B", "text": "Sau Cách mạng Tháng Mười Nga (1917)"},
+      {"key": "C", "text": "Sau Cách mạng Tháng Tám (1945)"},
+      {"key": "D", "text": "Sau công xã Pari (1871)"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 31,
+    "id": 294047508,
+    "question": "Cơ sở kinh tế của nền dân chủ tư sản là:",
+    "options": [
+      {"key": "A", "text": "Chế độ sở hữu công cộng"},
+      {"key": "B", "text": "Chế độ tư hữu về tư liệu sản xuất"},
+      {"key": "C", "text": "Chế độ sở hữu xã hội về tư liệu sản xuất"},
+      {"key": "D", "text": "Chế độ sở hữu chung"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 32,
+    "id": 294047509,
+    "question": "Điền từ vào chỗ trống: “Dân chủ là… gắn với các hình thức tổ chức nhà nước của giai cấp cầm quyền”",
+    "options": [
+      {"key": "A", "text": "Một phạm trù chính trị"},
+      {"key": "B", "text": "Một phạm trù văn hóa"},
+      {"key": "C", "text": "Một phạm trù kinh tế"},
+      {"key": "D", "text": "Một phạm trù vĩnh viễn"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 33,
+    "id": 294047511,
+    "question": "Điền từ vào chỗ trống: “Dân chủ là… gắn với quá trình ra đời, phát triển của lịch sử xã hội”",
+    "options": [
+      {"key": "A", "text": "Một phạm trù chính trị"},
+      {"key": "B", "text": "Một phạm trù văn hóa"},
+      {"key": "C", "text": "Một phạm trù vĩnh viễn"},
+      {"key": "D", "text": "Một phạm trù lịch sử"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 34,
+    "id": 294047512,
+    "question": "Dân chủ là:",
+    "options": [
+      {"key": "A", "text": "Một giá trị xã hội phản ánh những quyền cơ bản của con người"},
+      {"key": "B", "text": "Là một phạm trù chính trị gắn với các hình thức tổ chức nhà nước của giai cấp cầm quyền"},
+      {"key": "C", "text": "Là một phạm trù lịch sử gắn với quá trình ra đời, phát triển của lịch sử xã hội nhân loại"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 35,
+    "id": 294047513,
+    "question": "Quan điểm của Hồ Chí Minh về dân chủ",
+    "options": [
+      {"key": "A", "text": "Dân chủ là dân là chủ và dân làm chủ"},
+      {"key": "B", "text": "Dân chủ là một phạm trù lịch sử"},
+      {"key": "C", "text": "Dân chủ là một phạm trù vĩnh viễn"},
+      {"key": "D", "text": "Dân chủ là một nguyên tắc - nguyên tắc dân chủ"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 36,
+    "id": 294047514,
+    "question": "Quan điểm của Chủ nghĩa Mác - Lênin về dân chủ:",
+    "options": [
+      {"key": "A", "text": "Dân chủ trước hết là một giá trị nhân loại chung"},
+      {"key": "B", "text": "Tất cả các đáp án"},
+      {"key": "C", "text": "Dân chủ là dân là chủ và dân làm chủ"},
+      {"key": "D", "text": "Dân chủ là một hình thức hay hình thái nhà nước"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 37,
+    "id": 294047515,
+    "question": "Nền dân chủ chủ nô được xác lập trong chế độ nào?",
+    "options": [
+      {"key": "A", "text": "Chế độ cộng sản nguyên thủy"},
+      {"key": "B", "text": "Chế độ chiếm hữu nô lệ"},
+      {"key": "C", "text": "Chế độ phong kiến"},
+      {"key": "D", "text": "Chế độ xã hội chủ nghĩa"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 38,
+    "id": 294047517,
+    "question": "Nền dân chủ tư sản được xác lập trong chế độ nào?",
+    "options": [
+      {"key": "A", "text": "Chế độ cộng sản nguyên thủy"},
+      {"key": "B", "text": "Chế độ chiếm hữu nô lệ"},
+      {"key": "C", "text": "Chế độ tư bản chủ nghĩa"},
+      {"key": "D", "text": "Chế độ xã hội chủ nghĩa"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 39,
+    "id": 294047518,
+    "question": "Nền dân chủ xã hội chủ nghĩa được xác lập trong chế độ nào?",
+    "options": [
+      {"key": "A", "text": "Chế độ cộng sản nguyên thủy"},
+      {"key": "B", "text": "Chế độ phong kiến"},
+      {"key": "C", "text": "Chế độ chiếm hữu nô lệ"},
+      {"key": "D", "text": "Chế độ xã hội chủ nghĩa"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 40,
+    "id": 294047520,
+    "question": "Nguyên tắc cơ bản của nền dân chủ xã hội chủ nghĩa:",
+    "options": [
+      {"key": "A", "text": "Thu hẹp dân chủ"},
+      {"key": "B", "text": "Không ngừng mở rộng dân chủ, nâng cao mức độ giải phóng cho những người lao động"},
+      {"key": "C", "text": "Thực hiện dân chủ cho thiểu số"},
+      {"key": "D", "text": "Luôn tuân theo ý chí của giai cấp thống trị"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 41,
+    "id": 294047522,
+    "question": "Chọn đáp án sai, quan điểm về nền dân chủ xã hội chủ nghĩa:",
+    "options": [
+      {"key": "A", "text": "Thực hiện dân chủ cho thiểu số"},
+      {"key": "B", "text": "Xây dựng nhà nước dân chủ thực sự"},
+      {"key": "C", "text": "Thực hiện quyền lực của đại đa số nhân dân"},
+      {"key": "D", "text": "Bảo vệ quyền lợi cho đại đa số nhân dân"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 42,
+    "id": 294047523,
+    "question": "Nền dân chủ xã hội chủ nghĩa đặt dưới sự lãnh đạo của ai?",
+    "options": [
+      {"key": "A", "text": "Đảng cộng sản"},
+      {"key": "B", "text": "Nhà nước"},
+      {"key": "C", "text": "Các tổ chức chính trị - xã hội"},
+      {"key": "D", "text": "Chính phủ"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 43,
+    "id": 294047538,
+    "question": "Nền dân chủ xã hội chủ nghĩa là:",
+    "options": [
+      {"key": "A", "text": "Nền dân chủ cho thiểu số"},
+      {"key": "B", "text": "Nền dân chủ cho giai cấp tư sản"},
+      {"key": "C", "text": "Nền dân chủ đối với quần chúng nhân dân lao động và bị bóc lột"},
+      {"key": "D", "text": "Nền dân chủ cho giai cấp thống trị"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 44,
+    "id": 294047540,
+    "question": "Nền dân chủ xã hội chủ nghĩa thực hiện quyền lực và lợi ích của ai?",
+    "options": [
+      {"key": "A", "text": "Chỉ của giai cấp công nhân"},
+      {"key": "B", "text": "Toàn thể nhân dân"},
+      {"key": "C", "text": "Giai cấp tư sản"},
+      {"key": "D", "text": "Giai cấp bóc lột"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 45,
+    "id": 294047542,
+    "question": "Tìm đáp án đúng nhất, sự lãnh đạo của giai cấp công nhân thông qua Đảng cộng sản đối với toàn xã hội về mọi mặt gọi là gì?",
+    "options": [
+      {"key": "A", "text": "Sự thống trị kinh tế"},
+      {"key": "B", "text": "Sự thống trị văn hóa"},
+      {"key": "C", "text": "Sự thống trị tư tưởng"},
+      {"key": "D", "text": "Sự thống trị chính trị"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 46,
+    "id": 294047543,
+    "question": "Bản chất chính trị của nền dân chủ xã hội chủ nghĩa là:",
+    "options": [
+      {"key": "A", "text": "Quyền được tham gia rộng rãi vào công việc quản lý nhà nước của nhân dân"},
+      {"key": "B", "text": "Dựa trên chế độ tư hữu hữu về tư liệu sản xuất chủ yếu"},
+      {"key": "C", "text": "Lấy tư tưởng dân chủ tư sản làm chủ đạo"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 47,
+    "id": 294047544,
+    "question": "Bản chất kinh tế của nền dân chủ xã hội chủ nghĩa:",
+    "options": [
+      {"key": "A", "text": "Quản lý nhà nước thuộc về thiểu số"},
+      {"key": "B", "text": "Chế độ công hữu về tư liệu sản xuất chủ yếu"},
+      {"key": "C", "text": "Chế độ tư hữu về tư liệu sản xuất chủ yếu"},
+      {"key": "D", "text": "Lấy tư tưởng dân chủ tư sản làm chủ đạo"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 48,
+    "id": 294047546,
+    "question": "Bản chất tư tưởng - văn hóa - xã hội của nền dân chủ xã hội chủ nghĩa?",
+    "options": [
+      {"key": "A", "text": "Lấy hệ tư tưởng Mác - Lênin làm chủ đạo"},
+      {"key": "B", "text": "Kế thừa, phát huy những tinh hoa văn hóa truyền thống dân tộc"},
+      {"key": "C", "text": "Tiếp thu những giá trị tư tưởng, văn hóa, văn minh, tiến bộ xã hội"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 49,
+    "id": 294047548,
+    "question": "Tìm đáp án đúng nhất, nhà nước xã hội chủ nghĩa ra đời là kết quả của cuộc đấu tranh cách mạng của giai cấp nào?",
+    "options": [
+      {"key": "A", "text": "Giai cấp tư sản"},
+      {"key": "B", "text": "Giai cấp chủ nô"},
+      {"key": "C", "text": "Giai cấp vô sản và nhân dân lao động"},
+      {"key": "D", "text": "Giai cấp nông dân"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 50,
+    "id": 294047550,
+    "question": "Điền vào chỗ trống: “nhà nước xã hội chủ nghĩa là nhà nước mà ở đó, sự thống trị chính trị thuộc về…”",
+    "options": [
+      {"key": "A", "text": "Giai cấp nông dân"},
+      {"key": "B", "text": "Giai cấp công nhân"},
+      {"key": "C", "text": "Giai cấp tư sản"},
+      {"key": "D", "text": "Giai cấp chủ nô"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 51,
+    "id": 294047551,
+    "question": "Điền vào chỗ trống: “Nhà nước xã hội chủ nghĩa do cách mạng xã hội chủ nghĩa sản sinh ra và có sứ mệnh xây dựng thành công…”",
+    "options": [
+      {"key": "A", "text": "Chủ nghĩa xã hội"},
+      {"key": "B", "text": "Chủ nghĩa tư bản"},
+      {"key": "C", "text": "Chế độ phong kiến"},
+      {"key": "D", "text": "Chế độ chiếm hữu nô lệ"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 52,
+    "id": 294047553,
+    "question": "Nhà nước xã hội chủ nghĩa mang bản chất của giai cấp nào?",
+    "options": [
+      {"key": "A", "text": "Giai cấp nông dân"},
+      {"key": "B", "text": "Giai cấp tư sản"},
+      {"key": "C", "text": "Giai cấp chủ nô"},
+      {"key": "D", "text": "Giai cấp công nhân"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 53,
+    "id": 294047555,
+    "question": "Sự thống trị của giai cấp vô sản có sự khác biệt về chất so với sự thống trị của các giai cấp bóc lột trước đây là ở chỗ:",
+    "options": [
+      {"key": "A", "text": "Sự thống trị và lợi ích chỉ phục vụ cho thiểu số"},
+      {"key": "B", "text": "Sự thống trị của thiểu số đối với tất cả các giai cấp tầng lớp nhân dân lao động"},
+      {"key": "C", "text": "Sự thống trị của đa số đối và vì lợi ích chung của toàn xã hội"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 54,
+    "id": 294047557,
+    "question": "Bản chất kinh tế của nhà nước xã hội chủ nghĩa:",
+    "options": [
+      {"key": "A", "text": "Mang bản chất của giai cấp nông dân"},
+      {"key": "B", "text": "Dựa trên chế độ sở hữu xã hội về tư liệu sản xuất chủ yếu"},
+      {"key": "C", "text": "Được xây dựng trên nền tảng lý luận của chủ nghĩa Mác - Lênin"},
+      {"key": "D", "text": "Được xây dựng trên nền tảng giá trị văn hóa mang bản sắc riêng của dân tộc"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 55,
+    "id": 294047558,
+    "question": "Tìm đáp án đúng nhất, bản chất chính trị của nhà nước xã hội chủ nghĩa là:",
+    "options": [
+      {"key": "A", "text": "Mang bản chất của giai cấp công nhân"},
+      {"key": "B", "text": "Được xây dựng trên chế độ tư hữu về tư liệu sản xuất chủ yếu"},
+      {"key": "C", "text": "Xây dựng trên nền tảng lý luận của dân chủ tư sản"},
+      {"key": "D", "text": "Xây dựng trên nền tảng mang bản sắc riêng của dân tộc"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 56,
+    "id": 294047560,
+    "question": "Bản chất văn hóa, xã hội của nhà nước xã hội chủ nghĩa:",
+    "options": [
+      {"key": "A", "text": "Mang bản chất của giai cấp nông dân"},
+      {"key": "B", "text": "Chế độ tư hữu về tư liệu sản xuất chủ yếu"},
+      {"key": "C", "text": "Xây dựng trên nền tảng tinh thần là lý luận của Chủ nghĩa Mác - Lênin"},
+      {"key": "D", "text": "Dựa trên sự thống trị của thiểu số đối với đa số"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 57,
+    "id": 294047562,
+    "question": "Luận điểm nào sau đây sai?",
+    "options": [
+      {"key": "A", "text": "Nhà nước xã hội chủ nghĩa xây dựng trên cơ sở chế độ sở hữu xã hội về tư liệu sản xuất chủ yếu"},
+      {"key": "B", "text": "Nhà nước xã hội chủ nghĩa xây dựng trên nền tảng tinh thần là lý luận của Chủ nghĩa Mác - Lênin"},
+      {"key": "C", "text": "Nhà nước xã hội chủ nghĩa mang bản chất của giai cấp công nhân"},
+      {"key": "D", "text": "Nhà nước xã hội chủ nghĩa xây dựng trên nền tảng chế độ tư hữu về tư liệu sản xuất chủ yếu"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 58,
+    "id": 294047563,
+    "question": "Tìm đáp án sai về nhà nước pháp quyền xã hội chủ nghĩa Việt Nam?",
+    "options": [
+      {"key": "A", "text": "Là nhà nước của dân, do dân, vì dân"},
+      {"key": "B", "text": "Nhà nước phải do Đảng Cộng sản Việt Nam lãnh đạo"},
+      {"key": "C", "text": "Là nhà nước tôn trọng quyền con người, coi người là chủ thể, là trung tâm của sự phát triển"},
+      {"key": "D", "text": "Là nhà nước dựa trên nguyên tắc quyền lực thuộc về thiểu số"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 59,
+    "id": 294047564,
+    "question": "Căn cứ vào phạm vi tác động của quyền lực nhà nước, chức năng của nhà nước xã hội chủ nghĩa được chia thành:",
+    "options": [
+      {"key": "A", "text": "Chức năng đối nội và đối ngoại"},
+      {"key": "B", "text": "Chức năng chính trị, kinh tế, văn hóa, xã hội"},
+      {"key": "C", "text": "Chức năng giai cấp và chức năng xã hội"},
+      {"key": "D", "text": "Chức năng trấn áp và tổ chức xây dựng"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 60,
+    "id": 294047565,
+    "question": "Căn cứ vào lĩnh vực tác động của quyền lực nhà nước, chức năng của nhà nước xã hội chủ nghĩa được chia thành",
+    "options": [
+      {"key": "A", "text": "Chức năng đối nội và đối ngoại"},
+      {"key": "B", "text": "Chức năng giai cấp và chức năng xã hội"},
+      {"key": "C", "text": "Chức năng chính trị, kinh tế, văn hóa, xã hội"},
+      {"key": "D", "text": "Chức năng trấn áp và tổ chức xây dựng"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 61,
+    "id": 294047566,
+    "question": "Nội dung và mục đích cuối cùng của nhà nước xã hội chủ nghĩa là gì?",
+    "options": [
+      {"key": "A", "text": "Chỉ đấu tranh để giành chính quyền"},
+      {"key": "B", "text": "Chỉ đòi tăng lương, giảm giờ làm"},
+      {"key": "C", "text": "Cải tạo xã hội cũ, xây dựng thành công xã hội mới"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 62,
+    "id": 294047567,
+    "question": "Mối quan hệ giữa dân chủ xã hội chủ nghĩa và nhà nước xã hội chủ nghĩa:",
+    "options": [
+      {"key": "A", "text": "Dân chủ xã hội chủ nghĩa là cơ sở, nền tảng cho việc xây dựng và hoạt động của nhà nước xã hội chủ nghĩa"},
+      {"key": "B", "text": "Nhà nước xã hội chủ nghĩa trở thành công cụ quan trọng cho việc thực thi quyền làm chủ của người dân"},
+      {"key": "C", "text": "Nhà nước xã hội chủ nghĩa nằm trong nền dân chủ xã hội chủ nghĩa là phương thức thể hiện và thực hiện dân chủ"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 63,
+    "id": 294047568,
+    "question": "Trong hệ thống chính trị xã hội chủ nghĩa, Đảng ta xem cơ quan nào là trụ cột, một công cụ chủ yếu, vững mạnh của nhân dân?",
+    "options": [
+      {"key": "A", "text": "Chính phủ"},
+      {"key": "B", "text": "Đảng cộng sản"},
+      {"key": "C", "text": "Nhà nước"},
+      {"key": "D", "text": "Các tổ chức chính trị - xã hội"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 64,
+    "id": 294047569,
+    "question": "Luận điểm sau là của ai: “Dân chủ xã hội chủ nghĩa là bản chất của chế độ ta, vừa là mục tiêu, vừa là động lực của sự phát triển đất nước”",
+    "options": [
+      {"key": "A", "text": "Đảng Cộng sản Việt Nam"},
+      {"key": "B", "text": "Hồ Chí Minh"},
+      {"key": "C", "text": "V.I. Lênin"},
+      {"key": "D", "text": "C. Mác và Ph. Ăngghen"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 65,
+    "id": 294047570,
+    "question": "Bản chất của nền dân chủ xã hội chủ nghĩa ở Việt Nam",
+    "options": [
+      {"key": "A", "text": "Dựa trên cơ sở chế độ tư hữu"},
+      {"key": "B", "text": "Dựa vào nhà nước xã hội chủ nghĩa và sự ủng hộ, giúp đỡ của nhân dân"},
+      {"key": "C", "text": "Thực hiện trấn áp của thiểu số đối với đa số"},
+      {"key": "D", "text": "Dựa vào nhà nước tư sản"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 66,
+    "id": 294047571,
+    "question": "Bản chất chính trị của nền dân chủ xã hội chủ nghĩa thể hiện như thế nào:",
+    "options": [
+      {"key": "A", "text": "Là chế độ công hữu về tư liệu sản xuất"},
+      {"key": "B", "text": "Kết hợp hài hòa lợi ích cá nhân và lợi ích thể"},
+      {"key": "C", "text": "Là nền dân chủ phi giai cấp"},
+      {"key": "D", "text": "Là sự lãnh đạo của giai cấp công nhân thông qua Đảng Cộng sản để đảm bảo mọi quyền lực thuộc về nhân dân."}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 67,
+    "id": 294047572,
+    "question": "Trong xã hội có giai cấp, dân là ai và do đối tượng nào quy định :",
+    "options": [
+      {"key": "A", "text": "Là những thành viên trong xã hội, do luật pháp cuả giai cấp công nhân quy định"},
+      {"key": "B", "text": "Là những thành viên trong xã hội, do luật pháp cuả giai cấp thống trị quy định"},
+      {"key": "C", "text": "Là những thành viên trong xã hội, do luật pháp cuả giai cấp bị trị quy định"},
+      {"key": "D", "text": "Là những thành viên trong xã hội, do luật pháp cuả giai cấp tư sản quy định"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 68,
+    "id": 294047573,
+    "question": "Nền dân chủ là gì ?",
+    "options": [
+      {"key": "A", "text": "Là hình thái dân chủ gắn với bản chất, tính chất của nhà nước"},
+      {"key": "B", "text": "Là hình thái dân chủ gắn với bản chất của giai cấp bị trị"},
+      {"key": "C", "text": "Là hình thức dân chủ của xã hội chưa có nhà nước"},
+      {"key": "D", "text": "Là hình thức dân chủ do giai cấp bị trị đặt ra"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 69,
+    "id": 294047574,
+    "question": "Chọn đáp án đúng nhất, điền từ còn thiếu vào chỗ trống : Nền dân chủ do ... đặt ra được thể chế hóa bằng pháp luật:",
+    "options": [
+      {"key": "A", "text": "Giai cấp bị trị"},
+      {"key": "B", "text": "Giai cấp thống trị"},
+      {"key": "C", "text": "Nhân dân"},
+      {"key": "D", "text": "Giai cấp công nhân"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 70,
+    "id": 294047575,
+    "question": "Nền dân chủ xã hội chủ nghĩa là:",
+    "options": [
+      {"key": "A", "text": "Là nền dân chủ phi giai cấp"},
+      {"key": "B", "text": "Là nền dân chủ phi lịch sử"},
+      {"key": "C", "text": "Là nền dân chủ thuần túy"},
+      {"key": "D", "text": "Là mọi quyền lực thuộc về nhân dân, dân là chủ và dân làm chủ"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 71,
+    "id": 294047576,
+    "question": "Cơ cấu xã hội - giai cấp là gì?",
+    "options": [
+      {"key": "A", "text": "Là hệ thống gồm giai cấp cơ bản và không cơ bản tồn tại khách quan trong một chế độ xã hội nhất định"},
+      {"key": "B", "text": "Là hệ thống các giai cấp thống trị và bị trị tồn tại khách quan trong một chế độ xã hội nhất định"},
+      {"key": "C", "text": "Là hệ thống các giai cấp, tầng lớp xã hội tồn tại khách quan trong một chế độ xã hội nhất định."},
+      {"key": "D", "text": "Là hệ thống các giai cấp bị bóc lột và bóc lột tồn tại khách quan trong một chế độ xã hội nhất định"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 72,
+    "id": 294047577,
+    "question": "Cơ cấu xã hội - giai cấp trong thời kỳ quá độ lên CNXH được hình thành khi:",
+    "options": [
+      {"key": "A", "text": "Giai cấp công nhân giành được chính quyền"},
+      {"key": "B", "text": "Giai cấp công nhân đòi tăng lương giảm giờ làm"},
+      {"key": "C", "text": "Giai cấp công nhân tiến hành cách mạng"},
+      {"key": "D", "text": "Giai cấp công nhân xây dựng nền văn hóa tiên tiến, đậm đà bản sắc dân tộc"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 73,
+    "id": 294047578,
+    "question": "Trong xã hội có giai cấp, cơ cấu nào có vị trí quan trọng hàng đầu chi phối các loại hình cơ cấu xã hội khác?",
+    "options": [
+      {"key": "A", "text": "Cơ cấu xã hội - nghề nghiệp"},
+      {"key": "B", "text": "Cơ cấu xã hội dân số"},
+      {"key": "C", "text": "Cơ cấu xã hội dân tộc"},
+      {"key": "D", "text": "Cơ cấu xã hội giai cấp"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 74,
+    "id": 294047579,
+    "question": "Sự biến đổi của cơ cấu xã hội - giai cấp được quyết định bởi sự biến động của cơ cấu nào?",
+    "options": [
+      {"key": "A", "text": "Cơ cấu xã hội - dân số"},
+      {"key": "B", "text": "Cơ cấu xã hội - kinh tế"},
+      {"key": "C", "text": "Cơ cấu xã hội - dân tộc"},
+      {"key": "D", "text": "Cơ cấu xã hội-tôn giáo"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 75,
+    "id": 294047580,
+    "question": "Các giai cấp, tầng lớp xã hội cơ bản trong cơ cấu xã hội giai cấp của thời kỳ quá độ lên Chủ nghĩa xã hội:",
+    "options": [
+      {"key": "A", "text": "Giai cấp chủ nô và giai cấp nô lệ"},
+      {"key": "B", "text": "Giai cấp địa chủ và giai cấp nông dân"},
+      {"key": "C", "text": "Giai cấp địa chủ và giai cấp tư sản"},
+      {"key": "D", "text": "Giai cấp công nhân, giai cấp nông dân, tầng lớp trí thức, tầng lớp doanh nhân."}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 76,
+    "id": 294047581,
+    "question": "Cơ cấu xã hội - giai cấp trong thời kỳ quá độ lên CNXH đặt dưới sự lãnh đạo của:",
+    "options": [
+      {"key": "A", "text": "Đảng cộng sản"},
+      {"key": "B", "text": "Nhà nước"},
+      {"key": "C", "text": "Các tổ chức chính trị - xã hội"},
+      {"key": "D", "text": "Chính phủ"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 77,
+    "id": 294047582,
+    "question": "Yếu tố quyết định mối quan hệ giữa các giai cấp, tầng lớp, các nhóm xã hội trong cơ cấu xã hội - giai cấp",
+    "options": [
+      {"key": "A", "text": "Cùng đấu tranh giành chính quyền"},
+      {"key": "B", "text": "Cùng lật đổ chính quyền của giai cấp tư sản"},
+      {"key": "C", "text": "Cùng lật đổ chính quyền của giai cấp chủ nô"},
+      {"key": "D", "text": "Cùng chung sức cải tạo xã hội cũ, xây dựng xã hội mới"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 78,
+    "id": 294047583,
+    "question": "Sự biến đổi của cơ cấu xã hội - giai cấp ảnh hưởng đến sự biến đổi của cơ cấu - xã hội nào?",
+    "options": [
+      {"key": "A", "text": "Cơ cấu xã hội - nghề nghiệp"},
+      {"key": "B", "text": "Cơ cấu xã hội - tôn giáo"},
+      {"key": "C", "text": "Cơ cấu xã hội - dân tộc"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 79,
+    "id": 294047584,
+    "question": "Cơ cấu xã hội - giai cấp là căn cứ cơ bản để xây dựng chính sách phát triển các lĩnh vực cơ bản nào?",
+    "options": [
+      {"key": "A", "text": "Kinh tế"},
+      {"key": "B", "text": "Chính trị, tư tưởng"},
+      {"key": "C", "text": "Văn hoá"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 80,
+    "id": 294047585,
+    "question": "Tìm đáp án đúng, khi xem xét cơ cấu xã hội - giai cấp cần:",
+    "options": [
+      {"key": "A", "text": "Tuyệt đối hóa cơ cấu xã hội giai cấp"},
+      {"key": "B", "text": "Xem nhẹ các loại hình cơ cấu xã hội khác"},
+      {"key": "C", "text": "Xóa bỏ nhanh chóng các giai cấp, tầng lớp xã hội khác"},
+      {"key": "D", "text": "Không tuyệt đối hóa cơ cấu xã hội giai cấp"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 81,
+    "id": 294047586,
+    "question": "Tìm đáp án SAI: Khi xem xét cơ cấu xã hội - giai cấp cần:",
+    "options": [
+      {"key": "A", "text": "Thấy được vai trò quan trọng của cơ cấu xã hội"},
+      {"key": "B", "text": "Không tuyệt đối hóa vai trò của cơ cấu xã hội - giai cấp"},
+      {"key": "C", "text": "Xóa bỏ nhanh chóng các giai cấp, tầng lớp xã hội khác"},
+      {"key": "D", "text": "Coi trọng vai trò của các giai cấp tầng lớp xã hội khác"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 82,
+    "id": 294047587,
+    "question": "Vị trí của cơ cấu xã hội - giai cấp trong cơ cấu xã hội:",
+    "options": [
+      {"key": "A", "text": "Các loại hình cơ cấu xã hội khác chi phối cơ cấu xã hội - giai cấp"},
+      {"key": "B", "text": "Cơ cấu xã hội - giai cấp phụ thuộc hoàn toàn vào các cơ cấu xã hội khác"},
+      {"key": "C", "text": "Cơ cấu xã hội - giai cấp chi phối các loại hình cơ cấu xã hội khác"},
+      {"key": "D", "text": "Cơ cấu xã hội - giai cấp độc lập với các loại hình cơ cấu xã hội khác"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 83,
+    "id": 294047588,
+    "question": "Trong thời kỳ quá độ lên CNXH, cơ cấu xã hội - giai cấp biến đổi gắn liền và bị quy định bởi cơ cấu nào",
+    "options": [
+      {"key": "A", "text": "Cơ cấu xã hội - dân số"},
+      {"key": "B", "text": "Cơ cấu xã hội - lứa tuổi"},
+      {"key": "C", "text": "Cơ cấu xã hội - nghề nghiệp"},
+      {"key": "D", "text": "Cơ cấu xã hội - kinh tế"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 84,
+    "id": 294047589,
+    "question": "Điền từ còn thiếu vào chỗ trống: Theo Chủ nghĩa Mác - Lênin, hình thái kinh tế xã hội cộng sản chủ nghĩa đã được…..từ trong lòng xã hội tư bản",
+    "options": [
+      {"key": "A", "text": "Thai nghén"},
+      {"key": "B", "text": "Sinh ra"},
+      {"key": "C", "text": "Hình thành"},
+      {"key": "D", "text": "Mất đi"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 85,
+    "id": 294047590,
+    "question": "Liên minh công nhân với nông dân và các tầng lớp xã hội khác là hình thức liên minh:",
+    "options": [
+      {"key": "A", "text": "Giản đơn"},
+      {"key": "B", "text": "Đặc thù"},
+      {"key": "C", "text": "Có giới hạn"},
+      {"key": "D", "text": "Đặc biệt"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 86,
+    "id": 294047591,
+    "question": "C.Mác gọi giai cấp nào sau đây là giai cấp vô sản:",
+    "options": [
+      {"key": "A", "text": "Giai cấp tư sản"},
+      {"key": "B", "text": "Giai cấp tiểu tư sản"},
+      {"key": "C", "text": "Giai câps công nhân."},
+      {"key": "D", "text": "Giai cấp nông dân"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 87,
+    "id": 294047592,
+    "question": "Điền vào chỗ trống: ‘…là một hình thức đặc biệt của liên minh giai cấp giữa giai cấp vô sản với đông đảo những tầng lớp lao động không phải vô sản”",
+    "options": [
+      {"key": "A", "text": "Chuyên chính vô sản"},
+      {"key": "B", "text": "Cách mạng xã hội"},
+      {"key": "C", "text": "Đấu tranh giai cấp"},
+      {"key": "D", "text": "Bạo lực cách mạng"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 88,
+    "id": 294047593,
+    "question": "Liên minh giữa giai cấp công nhân với giai cấp nông dân và các tầng lớp xã hội khác nhằm chống lại:",
+    "options": [
+      {"key": "A", "text": "Giai cấp chủ nô"},
+      {"key": "B", "text": "Giai cấp phong kiến"},
+      {"key": "C", "text": "Giai cấp tiểu tư sản"},
+      {"key": "D", "text": "Giai cấp tư sản"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 89,
+    "id": 294047594,
+    "question": "Điền vào chỗ trống: Cơ cấu xã hội - giai cấp biến đổi… làm xuất hiện các tầng lớp xã hội mới.",
+    "options": [
+      {"key": "A", "text": "Thuần nhất"},
+      {"key": "B", "text": "Phức tạp, đa dạng"},
+      {"key": "C", "text": "Liên tục"},
+      {"key": "D", "text": "Đa chiều"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 90,
+    "id": 294047595,
+    "question": "Điền vào chỗ trống: Cơ cấu xã hội giai cấp biến đổi trong mối quan hệ…, từng bước xóa bỏ bất bình đẳng xã hội dẫn đến sự xích lại gần nhau.",
+    "options": [
+      {"key": "A", "text": "Vừa đấu tranh, vừa liên minh"},
+      {"key": "B", "text": "Vừa đấu tranh, vừa cạnh tranh"},
+      {"key": "C", "text": "Vừa thống nhất, vừa đấu tranh"},
+      {"key": "D", "text": "Vừa hợp nhât, vừa đấu tranh"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 91,
+    "id": 294047596,
+    "question": "Theo V.I. Lênin, hình thức liên minh đặc biệt trong thời kỳ quá độ lên CNXH là:",
+    "options": [
+      {"key": "A", "text": "Liên minh giữa giai cấp vô sản với giai cấp tư sản và các tầng lớp xã hội khác"},
+      {"key": "B", "text": "Liên minh giữa giai cấp công nhân với giai cấp tiểu tư sản"},
+      {"key": "C", "text": "Liên minh giữa giai cấp công nhân với giai cấp nông dân và các tầng lớp xã hội khác"},
+      {"key": "D", "text": "Liên minh giữa giai cấp công nhân với tầng lớp trí thức"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 92,
+    "id": 294047597,
+    "question": "Điền từ vào chỗ trống: “Nếu không liên minh với… thì không thể có được chính quyền của giai cấp vô sản”",
+    "options": [
+      {"key": "A", "text": "Công nhân"},
+      {"key": "B", "text": "Trí thức"},
+      {"key": "C", "text": "Tư sẩn"},
+      {"key": "D", "text": "Nông dân"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 93,
+    "id": 294047598,
+    "question": "Điền vào chỗ trống: “Nguyên tắc cao nhất của chính quyền là duy trì khối liên minh giữa… để giai cấp vô sản có thể giữ được vai trò lãnh đạo và chính quyền nhà nước.”",
+    "options": [
+      {"key": "A", "text": "Giai cấp tư sản và giai cấp công nhân"},
+      {"key": "B", "text": "Giai cấp vô sản và nông dân"},
+      {"key": "C", "text": "Giai cấp tiểu tư sản và giai cấp công nhân"},
+      {"key": "D", "text": "Giai cấp nông dân và giai cấp tư sản"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 94,
+    "id": 294047599,
+    "question": "Khối liên minh công nông trí thức cần thực hiện nhằm",
+    "options": [
+      {"key": "A", "text": "Tạo cơ sở kinh tế vững chắc cho khối đại đoàn kết toàn dân"},
+      {"key": "B", "text": "Tạo cơ sở chính trị - xã hội vững chắc cho khối đại đoàn kết toàn dân"},
+      {"key": "C", "text": "Tạo cơ sở văn hóa vững chắc cho khối đại đoàn kết toàn dân"},
+      {"key": "D", "text": "Tạo cơ sở tư tưởng vững chắc cho khối đại đoàn kết toàn dân"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 95,
+    "id": 294047600,
+    "question": "Nội dung văn hóa xã hội của liên minh công nông trí thức ở Việt Nam:",
+    "options": [
+      {"key": "A", "text": "Xây dựng nền văn hóa tiên tiến, đậm đà bản sắc dân tộc"},
+      {"key": "B", "text": "Tiếp thu tinh hoa văn hóa nhân loại"},
+      {"key": "C", "text": "Tiếp thu tinh hoa văn hóa của thời đại"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 96,
+    "id": 294047601,
+    "question": "Trong thời kỳ quá độ lên CNXH ở Việt Nam hiện nay, kết cấu kinh tế ở nước ta gồm:",
+    "options": [
+      {"key": "A", "text": "Kinh tế nhà nước, kinh tế tập thể, kinh tế tư nhân, kinh tế có vốn đầu tư nước ngoài"},
+      {"key": "B", "text": "Chỉ có kinh tế nhà nước và kinh tế tập thể"},
+      {"key": "C", "text": "Kinh tế tư nhân và kinh tế tập thể"},
+      {"key": "D", "text": "Kinh tế tư nhân và kinh tê nhà nước"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 97,
+    "id": 294047602,
+    "question": "Trong thời kỳ quá độ lên CNXH ở Việt Nam hiên nay, kết cấu kinh tế là:",
+    "options": [
+      {"key": "A", "text": "Kết cấu gồm hai thành phần kinh tế tư nhân và kinh tế tập thể"},
+      {"key": "B", "text": "Kết cấu gồm hai thành phần kinh tế nhà nước và kinh tế tư nhân"},
+      {"key": "C", "text": "Kết cấu kinh tế nhiều thành phần"},
+      {"key": "D", "text": "Kết cấu gồm hai thành phần kinh tế nhà nước và kinh tế tập thể"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 98,
+    "id": 294047603,
+    "question": "Trong thời kỳ quá độ lên CHXH, giai cấp công nhân, giai cấp nông dân và tầng lớp lao động khác đóng vai trò:",
+    "options": [
+      {"key": "A", "text": "Lực lượng sản xuất tiên tiến nhất."},
+      {"key": "B", "text": "Lực lượng sản xuất trực tiếp"},
+      {"key": "C", "text": "Đại diện cho quan hệ sản xuất cơ bản"},
+      {"key": "D", "text": "Là lực lượng sản xuất cơ bản, lực lượng chính trị - xã hội to lớn"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 99,
+    "id": 294047604,
+    "question": "Liên minh giai cấp, tầng lớp trong thời kỳ quá độ lên CNXH là:",
+    "options": [
+      {"key": "A", "text": "Sự đấu tranh giữa các giai cấp, tầng lớp xã hội"},
+      {"key": "B", "text": "Sự liên kết, hợp tác, hỗ trợ nhau giữa các giai cấp, tầng lớp xã hội"},
+      {"key": "C", "text": "Sự hợp nhất giữa các giai cấp, tầng lớp xã hội"},
+      {"key": "D", "text": "Sự đồng nhất giữa các giai cấp, tầng lớp xã hội"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 100,
+    "id": 294047605,
+    "question": "Trong thời kỳ quá độ lên CNXH ở Việt Nam hiện nay, cơ cấu kinh tế ở nước ta gồm:",
+    "options": [
+      {"key": "A", "text": "Kinh tế nhà nước, kinh tế tập thể và kinh tế tư nhân"},
+      {"key": "B", "text": "Kinh tế tư nhân, kinh tế nhà nước và kinh tế có vốn đầu tư nước ngoài."},
+      {"key": "C", "text": "Kinh tế nhà nước, kinh tế tập thể, kinh tế tư nhân và kinh tế có vốn đầu tư nước ngoài"},
+      {"key": "D", "text": "Kinh tế nhà nước, kinh tế tập thể và kinh tế có vốn đầu tư nước ngoài"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 101,
+    "id": 294047606,
+    "question": "Trong cơ cấu xã hội - giai cấp thời kỳ quá độ, giai cấp nào là lực lượng tiêu biểu cho phương thức sản xuất mới?",
+    "options": [
+      {"key": "A", "text": "Công nhân"},
+      {"key": "B", "text": "Nông dân"},
+      {"key": "C", "text": "Trí thức"},
+      {"key": "D", "text": "Tư sản"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 102,
+    "id": 294047607,
+    "question": "Trong cơ cấu xã hội giai cấp, giai cấp công nhân giữ vai trò gì?",
+    "options": [
+      {"key": "A", "text": "Vai trò chủ đạo, tiên phong trong quá trình cải tạo xã hội cũ, xây dựng xã hội mới"},
+      {"key": "B", "text": "Giữ vai trò quan trọng trong quá trình cải tạo xã hội cũ, xây dựng xã hội mới"},
+      {"key": "C", "text": "Quy địnhquá trình cải tạo xã hội cũ, xây dựng xã hội mới"},
+      {"key": "D", "text": "Là lực lượng đông đảo quá trình cải tạo xã hội cũ, xây dựng xã hội mới"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 103,
+    "id": 294047608,
+    "question": "Trong thời kỳ quá độ lên CNXH ở Việt Nam, sự biến đổi của cơ cấu xã hội - giai cấp bị chi phối bởi những biến đổi trong:",
+    "options": [
+      {"key": "A", "text": "Cơ cấu chính trị"},
+      {"key": "B", "text": "Cơ cấu xã hội"},
+      {"key": "C", "text": "Cơ cấu văn hóa"},
+      {"key": "D", "text": "Cơ cấu kinh tế"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 104,
+    "id": 294047609,
+    "question": "Thời kỳ trước đổi mới, cơ cấu xã hội - giai cấp ở Việt Nam gồm những những giai cấp cơ bản nào?",
+    "options": [
+      {"key": "A", "text": "Giai cấp công nhân, giai cấp nông dân, giai cấp tư sản"},
+      {"key": "B", "text": "Giai cấp công nhân, tầng lớp tiểu chủ và tầng lớp tri thức"},
+      {"key": "C", "text": "Giai cấp công nhân, giai cấp nông dân, tầng lớp trí thức"},
+      {"key": "D", "text": "Giai cấp công nhân, giai cấp nông dân, giai cấp tiểu tư sản."}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 105,
+    "id": 294047610,
+    "question": "Trong thời kỳ quá độ lên CNXH, cơ cấu xã hội giai cấp Việt Nam mang tính chất:",
+    "options": [
+      {"key": "A", "text": "Đa dạng."},
+      {"key": "B", "text": "Giản đơn"},
+      {"key": "C", "text": "Chủ quan"},
+      {"key": "D", "text": "Phổ biến"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 106,
+    "id": 294047611,
+    "question": "Cơ cấu xã hội giai cấp của Việt Nam ở thời kỳ quá độ lên CNXH gồm những giai cấp, tầng lớp cơ bản nào?",
+    "options": [
+      {"key": "A", "text": "Giai cấp công nhân, giai cấp nông dân, giai cấp tư sản"},
+      {"key": "B", "text": "Giai cấp công nhân, giai cấp nông dân, gia cấp chủ nô, tầng lớp tiểu chủ"},
+      {"key": "C", "text": "Giai cấp công nhân, giai cấp nông dân, đội ngũ trí thức, giai cấp địa chủ"},
+      {"key": "D", "text": "Giai cấp công nhân, giai cấp nông dân, đội ngũ trí thức, đội ngũ doanh nhân, phụ nữ, thanh niên"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 107,
+    "id": 294047612,
+    "question": "Trong cơ cấu xã hội - giai cấp Việt Nam, giai cấp công nhân có vai trò gì?",
+    "options": [
+      {"key": "A", "text": "Có vị trí chiến lược, là lực lượng quan trọng"},
+      {"key": "B", "text": "Là lực lượng đông đảo"},
+      {"key": "C", "text": "Có vai trò quan trọng đặc biệt, là giai cấp lãnh đạo"},
+      {"key": "D", "text": "Là rường cột của nước nhà"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 108,
+    "id": 294047613,
+    "question": "Trong cơ cấu xã hội - giai cấp Việt Nam, giai cấp nông dân có vai trò gì?",
+    "options": [
+      {"key": "A", "text": "Là rường cột của nước nhà"},
+      {"key": "B", "text": "Có vị trí chiến lược, là cơ sở và lực lượng quan trọng trong sự nghiệp công nghiệp hóa, hiện đại hóa nông nghiệp, nông thôn"},
+      {"key": "C", "text": "Có vai trò quan trọng đặc biệt, là giai cấp lãnh đạo"},
+      {"key": "D", "text": "Là lực lượng đông đảo"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 109,
+    "id": 294047614,
+    "question": "Trong cơ cấu xã hội - giai cấp Việt Nam, đội ngũ trí thức có vai trò gì?",
+    "options": [
+      {"key": "A", "text": "Là một lực lượng quan trọng và đông đảo"},
+      {"key": "B", "text": "Là rường cột của nước nhà"},
+      {"key": "C", "text": "Là lực lượng lao động sáng tạo đặc biệt"},
+      {"key": "D", "text": "Là giai cấp lãnh đạo"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 110,
+    "id": 294047615,
+    "question": "Trong cơ cấu xã hội - giai cấp Việt Nam, giai cấp nào có vai trò quan trọng đặc biệt, là giai cấp lãnh đạo?",
+    "options": [
+      {"key": "A", "text": "Giai cấp nông dân"},
+      {"key": "B", "text": "Đội ngũ trí thức"},
+      {"key": "C", "text": "Đội ngũ doanh nhân"},
+      {"key": "D", "text": "Giai cấp công nhân"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 111,
+    "id": 294047616,
+    "question": "Trongcơ cấu xã hội - giai cấp Việt Nam, giai cấp có vai trò chiến lược, là cơ sở và lực lượng quan trọng trong sự nghiệp công nghiệp hóa, hiện đại hóa nông nghiệp, nông thôn là:",
+    "options": [
+      {"key": "A", "text": "Giai cấp công nhân"},
+      {"key": "B", "text": "Giai cấp nông dân"},
+      {"key": "C", "text": "Đội ngũ thanh niên"},
+      {"key": "D", "text": "Giai cấp tư sản"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 112,
+    "id": 294047617,
+    "question": "Trong cơ cấu xã hội - giai cấp Việt Nam, giai cấp có vai trò là lực lượng lao động sáng tạo đặc biệt là:",
+    "options": [
+      {"key": "A", "text": "Giai cấp công nhân"},
+      {"key": "B", "text": "Giai cấp nông dân"},
+      {"key": "C", "text": "Đội ngũ trí thức"},
+      {"key": "D", "text": "Đội ngũ thanh niên"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 113,
+    "id": 294047618,
+    "question": "Trongcơ cấu xã hội - giai cấp ở Việt Nam, giai cấp có vai trò là rường cột của nước nhà là;",
+    "options": [
+      {"key": "A", "text": "Đội ngũ thanh niên"},
+      {"key": "B", "text": "Đội ngũ trí thức"},
+      {"key": "C", "text": "Giai cấp nông dân"},
+      {"key": "D", "text": "Phụ nữ"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 114,
+    "id": 294047619,
+    "question": "Trongcơ cấu xã hội - giai cấp Việt Nam, đội ngũ thanh niên có vai trò:",
+    "options": [
+      {"key": "A", "text": "Là một lực lượng quan trọng và đông đảo"},
+      {"key": "B", "text": "Là lực lượng lao động đặc biệt"},
+      {"key": "C", "text": "Là giai cấp lãnh đạo"},
+      {"key": "D", "text": "Là rường cột của nước nhà"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 115,
+    "id": 294047620,
+    "question": "Hiện nay ở Việt Nam, đội ngũ doanh nhân đang có xu hướng:",
+    "options": [
+      {"key": "A", "text": "Tăng nhanh về số lượng và quy mô"},
+      {"key": "B", "text": "Giảm nhanh về số lượng và quy mô"},
+      {"key": "C", "text": "Tăng nhanh về số lượng và giảm quy mô"},
+      {"key": "D", "text": "Tăng nhanh về quy mô và giảm số lượng"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 116,
+    "id": 294047621,
+    "question": "Trong thời kỳ quá độ lên CNXH, giai cấp nông dân có xu hướng:",
+    "options": [
+      {"key": "A", "text": "Giảm dần về số lượng và tỷ lệ"},
+      {"key": "B", "text": "Tăng lên về số lượng và tỷ lệ"},
+      {"key": "C", "text": "Giảm về số lượng và tăng tỷ lệ"},
+      {"key": "D", "text": "Nhảy vọt về số lượng và tỷ lệ"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 117,
+    "id": 294047622,
+    "question": "Trong thời kỳ quá độ lên chủ nghĩa xã hội, giai cấp công nhân có xu hướng nào?",
+    "options": [
+      {"key": "A", "text": "Giảm dần về số lượng và tỷ lệ"},
+      {"key": "B", "text": "Tăng lên về số lượng và chất lượng"},
+      {"key": "C", "text": "Tăng về số lượng và giảm về chất lượng"},
+      {"key": "D", "text": "Giảm dần về cả số lượng và chất lượng"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 118,
+    "id": 294047623,
+    "question": "Vai trò của giai cấp công nhân Việt Nam trong cơ cấu xã hội - giai cấp:",
+    "options": [
+      {"key": "A", "text": "Là giai cấp lãnh đạo cách mạng"},
+      {"key": "B", "text": "Giữ vị trí tiên phong trong sự nghiệp xây dựng chủ nghĩa xã hội"},
+      {"key": "C", "text": "Là lực lượng đi đầu trong sự nghiệp công nghiệp hóa, hiện đại hóa đất nước"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 119,
+    "id": 294047624,
+    "question": "Điền vào chỗ trống: Tăng cường khối đại đoàn kết toàn dân tộc trên nền tảng liên minh .... với ... và ... do Đảng cộng sản lãnh đạo.",
+    "options": [
+      {"key": "A", "text": "Giai cấp công nhân - giai cấp nông dân - đội ngũ trí thức"},
+      {"key": "B", "text": "Giai cấp công nhân - giai cấp nông dân - giai cấp tư sản"},
+      {"key": "C", "text": "Giai cấp công nhân - giai cấp nông dân - tầng lớp tiểu tư sản"},
+      {"key": "D", "text": "Giai cấp công nhân - giai cấp nông dân - đội ngũ doanh nhân"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 120,
+    "id": 294047625,
+    "question": "Những nội dung liên minh giai cấp, tầng lớp trong thời kỳ quá độ lên CNXH ở Việt Nam?",
+    "options": [
+      {"key": "A", "text": "Nội dung kinh tế và chính trị"},
+      {"key": "B", "text": "Nội dung tư tưởng và văn hóa"},
+      {"key": "C", "text": "Nội dung kinh tế, chính trị, văn hóa xã hội"},
+      {"key": "D", "text": "Nội dung chính trị và tư tưởng"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 121,
+    "id": 294047626,
+    "question": "Nội dung cơ bản quyết định nhất trong nội dung của liên minh giai cấp tầng lớp trong thời kỳ quá độ lên CNXH ở Việt Nam:",
+    "options": [
+      {"key": "A", "text": "Nội dung kinh tế của liên minh"},
+      {"key": "B", "text": "Nội dung chính trị của liên minh"},
+      {"key": "C", "text": "Nội dung văn hóa xã hội của liên minh"},
+      {"key": "D", "text": "Nội dung tư tưởng của liên minh"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 122,
+    "id": 294047627,
+    "question": "Nội dung nào là cơ sở vật chất kỹ thuật của liên minh trong thời kỳ quá độ lên CNXH ở Việt Nam?",
+    "options": [
+      {"key": "A", "text": "Nội dung chính trị của liên minh"},
+      {"key": "B", "text": "Nội dung văn hóa, xã hội của liên minh"},
+      {"key": "C", "text": "Nội dung kinh tế của liên minh"},
+      {"key": "D", "text": "Nội dung tư tưởng của liên minh"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 123,
+    "id": 294047628,
+    "question": "Nội dung chính trị của liên minh thể hiện ở việc giữ vững lập trường chính trị - tư tưởng của giai cấp nào?",
+    "options": [
+      {"key": "A", "text": "Giai cấp nông dân"},
+      {"key": "B", "text": "Giai cấp tư sản"},
+      {"key": "C", "text": "Giai cấp chủ nô"},
+      {"key": "D", "text": "Giai cấp công nhân"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 124,
+    "id": 294047629,
+    "question": "Khối liên minh công nông trí thức đặt dưới sự lãnh đạo của:",
+    "options": [
+      {"key": "A", "text": "Nhà nước xã hội chủ nghĩa"},
+      {"key": "B", "text": "Đảng cộng sản."},
+      {"key": "C", "text": "Các tổ chức chính trị - xã hội"},
+      {"key": "D", "text": "Chính phủ"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 125,
+    "id": 294047630,
+    "question": "Trong hệ thống chính sách xã hội, chính sách nào được đặt lên vị trí hàng đầu?",
+    "options": [
+      {"key": "A", "text": "Chính sách liên quan đến cơ cấu xã hội - giai cấp"},
+      {"key": "B", "text": "Chính sách liên quan đến cơ cấu xã hội - nghề nghiệp"},
+      {"key": "C", "text": "Chính sách liên quan đến cơ cấu xã hội - dân tộc"},
+      {"key": "D", "text": "Chính sách liên quan đến cơ cấu xã hội - tôn giáo"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 126,
+    "id": 294047631,
+    "question": "Theo quan điểm của chủ nghĩa Mác – Lênin, dân tộc là quá trình phát triển lâu dài trải qua các hình thức cộng đồng từ thấp đến cao nào?",
+    "options": [
+      {"key": "A", "text": "Thị tộc, bộ lạc, bộ tộc, dân tộc"},
+      {"key": "B", "text": "Bộ tộc, bộ lạc, dân tộc, thị tộc"},
+      {"key": "C", "text": "Bộ lạc, bộ tộc, thị tộc, dân tộc"},
+      {"key": "D", "text": "Dân tộc, thị tộc, bộ lạc, bộ tộc"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 127,
+    "id": 294047632,
+    "question": "Ở các nước phương Tây, dân tộc hình thành khi nào?",
+    "options": [
+      {"key": "A", "text": "Chế độ cộng sản nguyên thủy"},
+      {"key": "B", "text": "Chế độ phong kiến"},
+      {"key": "C", "text": "Chế độ tư bản chủ nghĩa"},
+      {"key": "D", "text": "Chế độ xã hội chủ nghĩa"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 128,
+    "id": 294047633,
+    "question": "Ở phương Đông, yếu tố nào là cơ bản nhất để hình thành dân tộc?",
+    "options": [
+      {"key": "A", "text": "Do muốn phát triển kinh tế"},
+      {"key": "B", "text": "Do yếu tố chính trị"},
+      {"key": "C", "text": "Do yêu cầu đoàn kết để chống thiên tai và chống giặc ngoại xâm"},
+      {"key": "D", "text": "Do sự phát triển và giao lưu văn hóa"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 129,
+    "id": 294047634,
+    "question": "Ở phương Đông, dân tộc được hình thành dựa trên cơ sở nào?",
+    "options": [
+      {"key": "A", "text": "Một nền văn hóa, một tâm lý dân tộc đã phát triển tương đối chín muồi"},
+      {"key": "B", "text": "Một cộng đồng kinh tế còn kém phát triển và ở trạng thái phân tán"},
+      {"key": "C", "text": "Yêu cầu về đoàn kết để chống thiên tai và giặc ngoại xâm"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 130,
+    "id": 294047635,
+    "question": "Dân tộc hay quốc gia dân tộc có các đặc trưng:",
+    "options": [
+      {"key": "A", "text": "Có chung phương thức sinh hoạt kinh tế"},
+      {"key": "B", "text": "Có lãnh thổ chung ổn định không bị chia cắt và có sự quản lý của một nhà nước"},
+      {"key": "C", "text": "Có ngôn ngữ chung của quốc gia và có nét tâm lý biểu hiện qua nên văn hóa dân tộc"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 131,
+    "id": 294047636,
+    "question": "Đâu là đặc trưng quan trọng nhất của dân tộc quốc gia và là cơ sở liên kết các bộ phận, các thành viên của dân tộc?",
+    "options": [
+      {"key": "A", "text": "Có lãnh thổ chung ổn định không bị chia cắt"},
+      {"key": "B", "text": "Có chung phương thức sinh hoạt kinh tế"},
+      {"key": "C", "text": "Có sự quản lý của một nhà nước"},
+      {"key": "D", "text": "Có nét tâm lý biểu hiện qua nền văn hóa dân tộc"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 132,
+    "id": 294047637,
+    "question": "Đặc trưng của dân tộc - tộc người:",
+    "options": [
+      {"key": "A", "text": "Cộng đồng về ngôn ngữ"},
+      {"key": "B", "text": "Cộng đồng về văn hóa"},
+      {"key": "C", "text": "Ý thức tự giác tộc người"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 133,
+    "id": 294047638,
+    "question": "Đâu là tiêu chí quan trọng nhất để phân định một tộc người và có vị trí quyết định đối với sự tồn tại và phát triển của mỗi dân tộc?",
+    "options": [
+      {"key": "A", "text": "Cộng đồng về ngôn ngữ"},
+      {"key": "B", "text": "Cộng đồng về văn hóa"},
+      {"key": "C", "text": "Ý thức tự giác tộc người"},
+      {"key": "D", "text": "Không có đáp án đúng"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 134,
+    "id": 294047639,
+    "question": "Lênin đã chỉ ra mấy xu hướng phát triển của dân tộc?",
+    "options": [
+      {"key": "A", "text": "Hai xu hướng"},
+      {"key": "B", "text": "Ba xu hướng"},
+      {"key": "C", "text": "Bốn xu hướng"},
+      {"key": "D", "text": "Năm xu hướng"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 135,
+    "id": 294047640,
+    "question": "Điền từ vào chỗ trống: “Trong xu hướng thứ nhất, do sự thức tỉnh và sự trưởng thành của ý thức dân tộc mà các cộng đồng dân cư muốn … để xác lập dân tộc độc lập”",
+    "options": [
+      {"key": "A", "text": "Đoàn kết"},
+      {"key": "B", "text": "Hợp tác"},
+      {"key": "C", "text": "Tách ra"},
+      {"key": "D", "text": "Hợp nhất"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 136,
+    "id": 294047641,
+    "question": "Xu hướng thứ nhất của sự phát triển quan hệ dân tộc thể hiện rõ nét ở:",
+    "options": [
+      {"key": "A", "text": "Phong trào đấu tranh giành độc lập dân tộc của các dân tộc thuộc địa muốn thoát khỏi sự áp bức, bóc lột của các nước thực dân, đế quốc"},
+      {"key": "B", "text": "Phong trào liên kết kết giữa các dân tộc về kinh tế"},
+      {"key": "C", "text": "Phong trào liên kết giữa các dân tộc về văn hóa"},
+      {"key": "D", "text": "Phong trào các dân tộc liên minh lại để xóa bỏ hàng rào ngăn cách giữa các dân tộc"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 137,
+    "id": 294047642,
+    "question": "Tìm đáp án đúng nhất, nguyên nhân của xu hướng thứ nhất trong sự phát triển của các dân tộc theo quan điểm của V.I.Lênin là gì?",
+    "options": [
+      {"key": "A", "text": "Do sự thức tỉnh, sự trưởng thành về ý thức dân tộc, ý thức về quyền sống của mình"},
+      {"key": "B", "text": "Do sự phát triển của lực lượng sản xuất, của khoa học công nghệ nên cần phải liên hiệp"},
+      {"key": "C", "text": "Do sự phát triển của giao lưu kinh tế trong xã hội tư bản"},
+      {"key": "D", "text": "Do sự phát triển của giao lưu văn hóa trong xã hội tư bản"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 138,
+    "id": 294047643,
+    "question": "Tìm đáp án đúng nhất, điền từ vào chỗ trống: “Trong xu hướng thứ hai, các dân tộc trong một quốc gia đa dân tộc, thậm chí ở nhiều quốc gia muốn … với nhau”?",
+    "options": [
+      {"key": "A", "text": "Tách ra"},
+      {"key": "B", "text": "Tất cả các đáp án"},
+      {"key": "C", "text": "Hợp nhất làm một"},
+      {"key": "D", "text": "Liên hiệp lại"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 139,
+    "id": 294047644,
+    "question": "Nguyên nhân quan trọng nhất của xu hướng thứ hai trong sự phát triển của các dân tộc theo quan điểm của V.I.Lênin:",
+    "options": [
+      {"key": "A", "text": "Do các dân tộc muốn xóa bỏ ách đô hộ của thực dân đế quốc"},
+      {"key": "B", "text": "Do các dân tộc ý thức về quyền sống của mình"},
+      {"key": "C", "text": "Do các dân tộc muốn khẳng định quyền tự quyết"},
+      {"key": "D", "text": "Do sự phát triển của lực lượng sản xuất, khoa học công nghệ, giao lưu kinh tế và văn hóa trong xã hội tư bản nên xuất hiện nhu cầu xóa bỏ hàng rào ngăn cách giữa các dân tộc"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 140,
+    "id": 294047645,
+    "question": "Trong cương lĩnh dân tộc của Đảng Cộng sản, có mấy nguyên tắc giải quyết vấn đề dân tộc?",
+    "options": [
+      {"key": "A", "text": "Hai nguyên tắc"},
+      {"key": "B", "text": "Ba nguyên tắc"},
+      {"key": "C", "text": "Bốn nguyên tắc"},
+      {"key": "D", "text": "Năm nguyên tắc"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 141,
+    "id": 294047646,
+    "question": "Tác phẩm: “Về quyền dân tộc tự quyết” là của ai?",
+    "options": [
+      {"key": "A", "text": "C.Mác"},
+      {"key": "B", "text": "V.I. Lênin"},
+      {"key": "C", "text": "Ph.Ăngghen"},
+      {"key": "D", "text": "Hồ Chí Minh"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 142,
+    "id": 294047647,
+    "question": "Nội dung đầy đủ theo cương lĩnh dân tộc của Chủ nghĩa Mác – Lênin là:",
+    "options": [
+      {"key": "A", "text": "Các dân tộc hoàn toàn bình đẳng, các dân tộc được quyền tự quyết, liên hiệp công nhân tất cả các dân tộc"},
+      {"key": "B", "text": "Các dân tộc cần có sự phân biệt và liên hiệp công nhân tất cả các dân tộc"},
+      {"key": "C", "text": "Các dân tộc có quyền bình đẳng, có quyền tự quyết, liên hiệp giai cấp tư sản của tất cả các dân tộc"},
+      {"key": "D", "text": "Các dân tộc không có quyền tự quyết và liên hiệp công nhân các dân tộc"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 143,
+    "id": 294047648,
+    "question": "Điền từ đúng nhất vào chỗ trống: Quyền bình đẳng giữa các dân tộc là quyền… của các dân tộc",
+    "options": [
+      {"key": "A", "text": "Tồn tại"},
+      {"key": "B", "text": "Không cơ bản"},
+      {"key": "C", "text": "Thiêng liêng"},
+      {"key": "D", "text": "Cơ bản"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 144,
+    "id": 294047649,
+    "question": "Trong Cương lĩnh dân tộc của V.I.Lênin, các dân tộc được quyền bình đẳng được hiểu là:",
+    "options": [
+      {"key": "A", "text": "Không phân biệt dân tộc lớn hay nhỏ, trình độ phát triển cao hay thấp"},
+      {"key": "B", "text": "Các dân tộc đều có quyền lợi và nghĩa vụ như nhau"},
+      {"key": "C", "text": "Không dân tộc nào được giữa đặc quyền, đặc lợi về kinh tế, chính trị, văn hóa"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 145,
+    "id": 294047650,
+    "question": "Điền từ đúng nhất vào chỗ trống: “Quyền dân tộc tự quyết là quyền của các dân tộc… lấy vận mệnh của dân tộc mình”",
+    "options": [
+      {"key": "A", "text": "Tự quyết định"},
+      {"key": "B", "text": "Làm chủ"},
+      {"key": "C", "text": "Tự lo liệu"},
+      {"key": "D", "text": "Tự do phát triển"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 146,
+    "id": 294047651,
+    "question": "Trong các nội dung của quyền dân tộc tự quyết, thì nội dung nào được coi là cơ bản nhất?",
+    "options": [
+      {"key": "A", "text": "Tự quyết về chính trị và con đường phát triển của dân tộc"},
+      {"key": "B", "text": "Tự quyết về xã hội và con đường phát triển"},
+      {"key": "C", "text": "Tự quyết về văn hóa và con đường phát triển"},
+      {"key": "D", "text": "Tự quyết về lãnh thổ và con đường phát triển"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 147,
+    "id": 294047652,
+    "question": "Các dân tộc có quyền tự quyết có nghĩa là:",
+    "options": [
+      {"key": "A", "text": "Là quyền của các dân tộc tự quyết định vận mệnh của dân tộc mình"},
+      {"key": "B", "text": "Quyền tự lựa chọn chế độ chính trị và con đường phát triển của dân tộc mình"},
+      {"key": "C", "text": "Quyền tách ra thành lập một quốc gia dân tộc độc lập, đồng thời có quyền tự nguyện liên hiệp với dân tộc khác trên cơ sở bình đẳng"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 148,
+    "id": 294047653,
+    "question": "Tìm câu trả lời sai về quyền tự quyết của các dân tộc?",
+    "options": [
+      {"key": "A", "text": "Là quyền tự quyết định vận mệnh của dân tộc mình"},
+      {"key": "B", "text": "Là quyền của các tộc người thiểu số trong một quốc gia đa tộc người muốn phân lập thành quốc gia dân tộc"},
+      {"key": "C", "text": "Là quyền tự tách ra thành một quốc gia dân tộc độc lập đồng thời có quyền tự nguyện liên hiệp với dân tộc khác trên cơ sở bình đẳng"},
+      {"key": "D", "text": "Việc thực hiện quyền dân tộc tự quyết phải xuất phát từ thực tiễn- cụ thể và phải đứng trên lập trường của giai cấp công nhân"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 149,
+    "id": 294047654,
+    "question": "Theo chủ nghĩa Mác-Lênin, khi giải quyết vấn đề dân tộc phải đứng vững trên lập trường của giai cấp, tầng lớp nào?",
+    "options": [
+      {"key": "A", "text": "Giai cấp công nhân"},
+      {"key": "B", "text": "Giai cấp nông dân"},
+      {"key": "C", "text": "Giai cấp tư sản"},
+      {"key": "D", "text": "Tầng lớp trí thức"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 150,
+    "id": 294047655,
+    "question": "Theo chủ nghĩa Mác-Lênin, giải quyết vấn đề dân tộc phải dựa yếu tố nào?",
+    "options": [
+      {"key": "A", "text": "Lợi ích của tầng lớp trí thức"},
+      {"key": "B", "text": "Lợi ích trước mắt của dân tộc"},
+      {"key": "C", "text": "Lợi ích cơ bản và lâu dài của dân tộc"},
+      {"key": "D", "text": "Lợi ích của giai cấp thống trị"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 151,
+    "id": 294047656,
+    "question": "Dân tộc Việt Nam là một quốc gia đa dân tộc, thống nhất gồm 54 dân tộc trong đó:",
+    "options": [
+      {"key": "A", "text": "Dân tộc Kinh chiếm 50%, 53 dân tộc thiểu số chiếm 50%"},
+      {"key": "B", "text": "Dân tộc Kinh chiếm 60%, 53 dân tộc thiểu số chiếm 40%"},
+      {"key": "C", "text": "Dân tộc Kinh chiếm 70%, 53 dân tộc thiểu số chiếm 30%"},
+      {"key": "D", "text": "Dân tộc Kinh chiếm 85,7%, 53 dân tộc thiểu số chiếm 14,3%"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 152,
+    "id": 294047657,
+    "question": "Đặc điểm của dân tộc Việt Nam là:",
+    "options": [
+      {"key": "A", "text": "Có sự chênh lệch về số dân giữa các tộc người"},
+      {"key": "B", "text": "Các dân tộc cư trú xen kẽ nhau"},
+      {"key": "C", "text": "Các dân tộc thiểu số ở Việt Nam phân bổ chủ yếu ở địa bàn có vị trí chiến lược quan trọng"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 153,
+    "id": 294047658,
+    "question": "Tìm đáp án không đúng về đặc điểm các dân tộc ở Việt Nam?",
+    "options": [
+      {"key": "A", "text": "Các dân tộc ở Việt Nam có trình độ dân trí phát triển đồng đều"},
+      {"key": "B", "text": "Các dân tọc thiểu số ở Việt Nam phân bổ chủ yếu ở địa bàn có vị trí chiến lược quan trọng"},
+      {"key": "C", "text": "Các dân tộc ở Việt Nam cư trú xen kẽ nhau"},
+      {"key": "D", "text": "Chất lượng đời sống của các dân tộc ở Việt Nam không đồng đều"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 154,
+    "id": 294047659,
+    "question": "Tìm đáp án không đúng về đặc điểm các dân tộc ở Việt Nam?",
+    "options": [
+      {"key": "A", "text": "Các dân tộc ở Việt Nam cư trú xen kẽ nhau"},
+      {"key": "B", "text": "Không có sự chênh lệch về dân số giữa các tộc người ở Việt Nam"},
+      {"key": "C", "text": "Các dân tộc ở Việt Nam có trình độ phát triển không đồng đều"},
+      {"key": "D", "text": "Các dân tộc thiểu số ở Việt Nam phân bổ chủ yếu ở địa bàn có vị trí chiến lược quan trọng"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 155,
+    "id": 294047660,
+    "question": "Các dân tộc ở Việt Nam có trình độ phát triển không đều, thể hiện rõ ở những phương diện nào?",
+    "options": [
+      {"key": "A", "text": "Phương diện xã hội"},
+      {"key": "B", "text": "Phương diện kinh tế"},
+      {"key": "C", "text": "Phương diện văn hóa, trình độ dân trí"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 156,
+    "id": 294047661,
+    "question": "Muốn thực hiện bình đẳng dân tộc, chúng ta phải làm gì?",
+    "options": [
+      {"key": "A", "text": "Từng bước giảm, tiến tới xóa bỏ khoảng cách phát triển giữa các dân tộc về kinh tế, văn hóa, xã hội"},
+      {"key": "B", "text": "Chỉ quan tâm từng bước, tiến tới xóa bỏ khoảng cách phát triển giữa các dân tộc về kinh tế"},
+      {"key": "C", "text": "Chỉ quan tâm từng bước, tiến tới xóa bỏ khoảng cách phát triển giữa các dân tộc về văn hóa"},
+      {"key": "D", "text": "Chỉ quan tâm xóa bỏ khoảng cách phát triển giữa các dân tộc về xã hội"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 157,
+    "id": 294047662,
+    "question": "Nguyên nhân và động lực quan trọng nhất làm cho các dân tộc Việt Nam có truyền thống đoàn kết gắn bó lâu đời là gì?",
+    "options": [
+      {"key": "A", "text": "Do yêu cầu của quá trình cải biến tự nhiên và nhu cầu phải hợp sức để chống giặc ngoại xâm"},
+      {"key": "B", "text": "Do các dân tộc ở Việt Nam cư trú đan xen lẫn nhau"},
+      {"key": "C", "text": "Do các dân tộc ở Việt Nam có nền văn hóa tương đồng với nhau"},
+      {"key": "D", "text": "Do các dân tộc ở Việt Nam có nền văn hóa khác biệt nhau"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 158,
+    "id": 294047663,
+    "question": "Nguyên nhân và động lực quan trọng nhất quyết định mọi thắng lợi của dân tộc Việt Nam qua các giai đoạn lịch sử là:",
+    "options": [
+      {"key": "A", "text": "Do tinh thần đoàn kết của các dân tộc"},
+      {"key": "B", "text": "Do nền kinh tế phát triển hơn so với các quốc gia trong khu vực"},
+      {"key": "C", "text": "Do nét văn hóa đặc thù của từng dân tộc thiểu số"},
+      {"key": "D", "text": "Do nét tương đồng trong văn hóa từng dân tộc"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 159,
+    "id": 294047664,
+    "question": "Điền vào chỗ trống: “Mỗi dân tộc có …, góp phần tạo nên sự … của nền văn hóa Việt Nam thống nhất”",
+    "options": [
+      {"key": "A", "text": "Bản sắc văn hóa riêng- phong phú, đa dạng"},
+      {"key": "B", "text": "Bản sắc văn hóa riêng- thống nhất"},
+      {"key": "C", "text": "Bản sắc văn hóa chung- phong phú, đa dạng"},
+      {"key": "D", "text": "Bản sắc văn hóa chung- thống nhất"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 160,
+    "id": 294047665,
+    "question": "Điền từ vào chỗ trống, Đại hội XII khẳng định: “Đoàn kết các dân tộc có vị trí… trong sự nghiệp cách mạng ở nước ta”:",
+    "options": [
+      {"key": "A", "text": "Chiến lược"},
+      {"key": "B", "text": "Sách lược"},
+      {"key": "C", "text": "Không quan trọng"},
+      {"key": "D", "text": "Nhất thời"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 161,
+    "id": 294047666,
+    "question": "Đâu là quan điểm của Đảng ta về vấn đề dân tộc?",
+    "options": [
+      {"key": "A", "text": "Vấn đề dân tộc và đoàn kết dân tộc là vấn đề chiến lược cơ bản, lâu dài, đồng thời cũng là vấn đề cấp bách hiện nay của cách mạng Việt Nam"},
+      {"key": "B", "text": "Vấn đề dân tộc và đoàn kết dân tộc là vấn đề không quan trọng của cách mạng Việt Nam"},
+      {"key": "C", "text": "Giải quyết vấn đề dân tộc và đoàn kết dân tộc phải đi trước so với việc phát triển kinh tế"},
+      {"key": "D", "text": "Vấn đề dân tộc và đoàn kết dân tộc là vấn đề sách lược, chỉ cần thực hiện trong thời gian ngắn của cách mạng Việt Nam"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 162,
+    "id": 294047667,
+    "question": "Nội dung chính trị trong chính sách dân tộc của Đảng và nhà nước ta là gì?",
+    "options": [
+      {"key": "A", "text": "Thực hiện bình đẳng, đoàn kết, tôn trọng, giúp nhau cùng phát triển giữa các dân tộc"},
+      {"key": "B", "text": "Chủ trương phát triển văn hóa là nền tảng quan trọng nhất thực hiện chính sách dân tộc"},
+      {"key": "C", "text": "Ưu tiên phát triển tâm lý đặc thù của mỗi dân tộc theo hướng tự nhiên không cần định hướng"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 163,
+    "id": 294047668,
+    "question": "Nội dung kinh tế trong chính sách dân tộc của Đảng và nhà nước ta là gì?",
+    "options": [
+      {"key": "A", "text": "Phát triển kinh tế- xã hội miền núi, đồng bào các dân tộc thiểu số, từng bước khắc phục khoảng cách chênh lệch giữa các vùng, các dân tộc"},
+      {"key": "B", "text": "Tập trung duy nhất vào phát triển kinh tế- xã hội ở các dân tộc vùng đồng bằng"},
+      {"key": "C", "text": "Tập trung duy nhất vào phát triển kinh tế- xã hội ở các dân tộc thuộc thành thị"},
+      {"key": "D", "text": "Phát triển kinh tế đi sau so với phát triển văn hóa ở các dân tộc thiểu số"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 164,
+    "id": 294047669,
+    "question": "Nội dung văn hóa trong chính sách dân tôc của Đảng và nhà nước ta là gì?",
+    "options": [
+      {"key": "A", "text": "Xây dựng nền văn hóa tiên tiến đậm đà bản sắc dân tộc"},
+      {"key": "B", "text": "Nâng cao trình độ văn hóa cho nhân dân các dân tộc"},
+      {"key": "C", "text": "Đào tạo cán bộ văn hóa"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 165,
+    "id": 294047670,
+    "question": "Yếu tố nào là nền tảng nhất quyết định, tăng cường đoàn kết và thực hiện quyền bình đẳng dân tộc?",
+    "options": [
+      {"key": "A", "text": "Phát triển kinh tế- xã hội"},
+      {"key": "B", "text": "Phát triển văn hóa"},
+      {"key": "C", "text": "Phát triển nét tâm lý đặc thù"},
+      {"key": "D", "text": "Phát triển chính trị- xã hội"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 166,
+    "id": 294047671,
+    "question": "Tìm phương án trả lời sai?",
+    "options": [
+      {"key": "A", "text": "Chính sách dân tộc của Đảng và nhà nước ta mang tính tiến bộ, nhân văn"},
+      {"key": "B", "text": "Chính sách dân tộc của Đảng và nhà nước ta không cho phép tư tưởng kỳ thị, chia rẽ dân tộc"},
+      {"key": "C", "text": "Chính sách dân tộc của Đảng và nhà nước ta phát huy nội lực của mỗi dân tộc kết hợp với sự giúp đỡ có hiệu quả của các dân tộc anh em trong cả nước"},
+      {"key": "D", "text": "Chính sách dân tộc của Đảng và nhà nước ta chưa coi trọng tinh thần đoàn kết các dân tộc"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 167,
+    "id": 294047672,
+    "question": "Bản chất của tôn giáo là gì?",
+    "options": [
+      {"key": "A", "text": "Là sự phản ánh đúng đắn của hiện thực khách quan vào đầu óc con người"},
+      {"key": "B", "text": "Là một hiện tượng không phải do con người sáng tạo ra"},
+      {"key": "C", "text": "Tất cả các đáp án"},
+      {"key": "D", "text": "Là một hình thái ý thức xã hội phản ánh một cách hoang đường, hư ảo hiện thực khách quan vào đầu óc con người"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 168,
+    "id": 294047673,
+    "question": "Điền từ còn thiếu vào chỗ trống, theo Ph.Ăngghen: “Tất cả mọi tôn giáo chẳng qua chỉ là sự phản ánh … vào trong đầu óc của con người - của những lực lượng ở bên ngoài chi phối cuộc sống hàng ngày của họ”",
+    "options": [
+      {"key": "A", "text": "Hư ảo"},
+      {"key": "B", "text": "Có thật"},
+      {"key": "C", "text": "Đúng đắn"},
+      {"key": "D", "text": "Hoàn toàn sai lầm"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 169,
+    "id": 294047674,
+    "question": "Theo chủ nghĩa Mác - Lênin, xét đến cùng nhân tố quan trọng nhất quyết định sự tồn tại của tôn giáo là gì?",
+    "options": [
+      {"key": "A", "text": "Văn hóa"},
+      {"key": "B", "text": "Sản xuất vật chất và các quan hệ kinh tế"},
+      {"key": "C", "text": "Điều kiện tự nhiên"},
+      {"key": "D", "text": "Yếu tố tâm lý"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 170,
+    "id": 294047675,
+    "question": "Tìm phương án sai, theo quan điểm của Chủ nghĩa Mác - Lênin:",
+    "options": [
+      {"key": "A", "text": "Con người sáng tạo ra tôn giáo vì mục đích, lợi ích của họ"},
+      {"key": "B", "text": "Tôn giáo phản ánh những ước mơ, nguyện vọng của con người"},
+      {"key": "C", "text": "Con người là chủ thể sáng tạo ra tôn giáo nên không bị lệ thuộc vào tôn giáo"},
+      {"key": "D", "text": "Con người sáng tạo ra tôn giáo nhưng lại bị lệ thuộc vào tôn giáo"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 171,
+    "id": 294047676,
+    "question": "Chọn câu trả lời đúng?",
+    "options": [
+      {"key": "A", "text": "Chủ nghĩa Mác - Lênin có thế giới quan duy tâm, các tôn giáo có thế giới quan duy vật"},
+      {"key": "B", "text": "Các tôn giáo có thế giới quan duy tâm, có sự khác biệt với thế giới quan duy vật biện chứng của chủ nghĩa Mác – Lênin"},
+      {"key": "C", "text": "Cả chủ nghĩa Mác - Lênin và tôn giáo đều mang thế giới quan duy vật"},
+      {"key": "D", "text": "Cả chủ nghĩa Mác - Lênin và tôn giáo đều mang thế giới quan duy tâm"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 172,
+    "id": 294047677,
+    "question": "Đâu không phải là quan điểm của Chủ nghĩa Mác – Lênin?",
+    "options": [
+      {"key": "A", "text": "Những người cộng sản không bao giờ xem thường hoặc trấn áp những nhu cầu tín ngưỡng, tôn giáo của nhân dân"},
+      {"key": "B", "text": "Những người cộng sản luôn tôn trọng quyền tự do tín ngưỡng, theo hoặc không theo tôn giáo của nhân dân"},
+      {"key": "C", "text": "Trong những điều kiện cụ thể, nững người cộng sản và những người có tín ngưỡng tôn giáo có thể cùng nhau xây dựng một xã hội tốt đẹp hơn ở thế giới hiện thực"},
+      {"key": "D", "text": "Những người cộng sản luôn luôn xem thường và tìm cách trấn áp những nhu cầu tín ngưỡng, tôn giáo của nhân dân"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 173,
+    "id": 294047678,
+    "question": "Ở Việt Nam: Thờ cúng Tổ tiên, Thờ anh hùng dân tộc, Thờ Mẫu, Thờ Thành hoàng làng thuộc về loại hình nào?",
+    "options": [
+      {"key": "A", "text": "Tín ngưỡng"},
+      {"key": "B", "text": "Tôn giáo"},
+      {"key": "C", "text": "Mê tín"},
+      {"key": "D", "text": "Mê tín dị đoan"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 174,
+    "id": 294047679,
+    "question": "Mối quan hệ giữa tôn giáo và tín ngưỡng là gì?",
+    "options": [
+      {"key": "A", "text": "Không đồng nhất nhưng có giao thoa nhất định"},
+      {"key": "B", "text": "Đồng nhất với nhau"},
+      {"key": "C", "text": "Không có mối quan hệ với nhau"},
+      {"key": "D", "text": "Tôn giáo rộng hơn tín ngưỡng"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 175,
+    "id": 294047680,
+    "question": "Mê tín dị đoan là gì?",
+    "options": [
+      {"key": "A", "text": "Niềm tin của con người vào các lực lượng siêu nhiên, thần thánh đến mức độ mê muội, cuồng tín đến những hành vi cực đoan, sai lệch quá mức gây tổn hại"},
+      {"key": "B", "text": "Niềm tin đúng đắn của con người vào các lực lượng siêu nhiên và mang lại kết quả tốt đẹp cho con người"},
+      {"key": "C", "text": "Là niềm tin dựa trên một cơ sở khoa học đúng đắn"},
+      {"key": "D", "text": "Là những suy đoán hành động, đúng phù hợp với những chuẩn mực trong cuộc sống"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 176,
+    "id": 294047681,
+    "question": "Nguồn gốc tự nhiên và kinh tế - xã hội của tôn giáo là gì?",
+    "options": [
+      {"key": "A", "text": "Do lực lượng sản xuất chưa phát triển"},
+      {"key": "B", "text": "Do con người cảm thấy yếu đuối, bất lực trước sự tác động của thiên nhiên"},
+      {"key": "C", "text": "Do sự bất lực của con người trước những bất công xã hội"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 177,
+    "id": 294047682,
+    "question": "Nguồn gốc nhận thức của tôn giáo là gì?",
+    "options": [
+      {"key": "A", "text": "Do nhận thức của con người đạt đến trình độ cao"},
+      {"key": "B", "text": "Do nhận thức của con người có thể lý giải được xã hội"},
+      {"key": "C", "text": "Do nhận thức của con người có thể lý giải được giới tự nhiên"},
+      {"key": "D", "text": "Do nhận thức của con người có giới hạn chưa giải thích được sự phong phú của thế giới"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 178,
+    "id": 294047683,
+    "question": "Tìm phương án trả lời sai về nội dung cơ bản trong nguồn gốc nhận thức của tôn giáo?",
+    "options": [
+      {"key": "A", "text": "Tôn giáo ra đời khi trong nhận thức của con người, khoảng cách giữa “biết” và “chưa biết” vẫn tồn tại"},
+      {"key": "B", "text": "Tôn giáo ra đời khi con người chưa thể nhận thức đầy đủ các vấn đề trong tự nhiên, trong xã hội"},
+      {"key": "C", "text": "Tôn giáo ra đời do con người biến cái nội dung khách quan thành cái siêu nhiên, thần thánh"},
+      {"key": "D", "text": "Tôn giáo ra đời khi tất cả các vấn đề đều được con người hiểu biết và lý giải một cách khoa học"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 179,
+    "id": 294047684,
+    "question": "Nguồn gốc tâm lý của tôn giáo là gì?",
+    "options": [
+      {"key": "A", "text": "Con người sợ hãi trước những hiện tượng tự nhiên, xã hội"},
+      {"key": "B", "text": "Con người muốn được bình yên khi làm một việc lớn"},
+      {"key": "C", "text": "Con người muốn thể hiện lòng biết ơn đối với những người có công với nước, với dân"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 180,
+    "id": 294047685,
+    "question": "Tính lịch sử của tôn giáo được thể hiện rõ ở nội dung nào?",
+    "options": [
+      {"key": "A", "text": "Tôn giáo được hình thành, phát triển và có khả năng biến đổi trong những giai đoạn lịch sử nhất định"},
+      {"key": "B", "text": "Khi các điều kiện kinh tế - xã hội thay đổi thì tôn giáo cũng có sự thay đổi theo"},
+      {"key": "C", "text": "Điều kiện kinh tế- xã hội thay đổi làm cho các tôn giáo cũng bị chia tách thành nhiều hệ phái khác nhau"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 181,
+    "id": 294047686,
+    "question": "Tìm phương án trả lời sai, tính lịch sử của tôn giáo thể hiện rõ ở đặc điểm nào?",
+    "options": [
+      {"key": "A", "text": "Tôn giáo được hình thành, phát triển theo những giai đoạn lịch sử nhất định"},
+      {"key": "B", "text": "Khi các điều kiện kinh tế- xã hội thay đổi thì tôn giáo cũng có sự thay đổi theo"},
+      {"key": "C", "text": "Sự thay đổi của tôn giáo hoàn toàn không phụ thuộc vào sự thay đổi của điều kiện kinh tế- xã hội"},
+      {"key": "D", "text": "Điều kiện kinh tế- xã hội thay đổi làm cho các tôn giáo cũng bị tách thành nhiều hệ phái khác nhau"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 182,
+    "id": 294047687,
+    "question": "Theo chủ nghĩa Mác – Lênin, khi nào tôn giáo sẽ dần dần mất đi vị trí của nó trong đời sống xã hội?",
+    "options": [
+      {"key": "A", "text": "Khi khoa học và giáo dục giúp cho đại đa số quần chúng nhân dân nhận thức được bản chất các hiện tượng tự nhiên và xã hội"},
+      {"key": "B", "text": "Khi khoa học và giáo dục chưa phát triển"},
+      {"key": "C", "text": "Khi nhận thức của con người vẫn còn thấp"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 183,
+    "id": 294047688,
+    "question": "Tính quần chúng của tôn giáo thể hiện:",
+    "options": [
+      {"key": "A", "text": "Số lượng tín đồ của tôn giáo rất đông đảo"},
+      {"key": "B", "text": "Các tôn giáo là nơi sinh hoạt văn hóa, tinh thần của một bộ phận quần chúng nhân dân"},
+      {"key": "C", "text": "Tôn giáo có tính nhân văn, hướng thiện nên được nhiều người ở các tầng lớp khác nhau trong xã hội tin theo"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 184,
+    "id": 294047689,
+    "question": "Tìm đáp án sai, tính quần chúng của tôn giáo thể hiện?",
+    "options": [
+      {"key": "A", "text": "Số lượng tín đồ của tôn giáo rất đông đảo"},
+      {"key": "B", "text": "Các tôn giáo là nơi sinh hoạt văn hóa của một bộ phận quần chúng nhân dân"},
+      {"key": "C", "text": "Tôn giáo có tính nhân văn, nhân đạo và hướng thiện nên tôn giáo được nhiều người đặc biệt là quần chúng lao động tin theo"},
+      {"key": "D", "text": "Các tôn giáo chỉ là nơi sinh hoạt văn hóa giành riêng cho giai cấp thống trị"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 185,
+    "id": 294047690,
+    "question": "Tính chính trị của tôn giáo xuất hiện khi:",
+    "options": [
+      {"key": "A", "text": "Xã hội chưa có phân chia giai cấp"},
+      {"key": "B", "text": "Xã hội đã có sự phân chia giai cấp"},
+      {"key": "C", "text": "Xã hội không có sự bất công của phân chia giai cấp"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 186,
+    "id": 294047691,
+    "question": "Tính chính trị của tôn giáo biểu hiện ở khía cạnh nào?",
+    "options": [
+      {"key": "A", "text": "Chỉ xuất hiện khi xã hội đã có sự phân chia giai cấp"},
+      {"key": "B", "text": "Giai cấp thống trị sử dụng tôn giáo để phục vụ cho lợi ích giai cấp mình"},
+      {"key": "C", "text": "Phản ánh lợi ích, nguyện vọng của các giai cấp khác nhau trong cuộc đấu tranh giai cấp"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 187,
+    "id": 294047692,
+    "question": "Tính chính trị của tôn giáo có đặc điểm nào?",
+    "options": [
+      {"key": "A", "text": "Xuất hiện khi xã hội chưa có phân chia giai cấp"},
+      {"key": "B", "text": "Các thế lực chính trị - xã hội không bao giờ lợi dụng tôn giáo để thực hiện mục đích chính trị của mình"},
+      {"key": "C", "text": "Giai cấp thống trị sử dụng tôn giáo để phục vụ lợi ích của mình"},
+      {"key": "D", "text": "Tôn giáo không thể phản ánh lợi ích của các giai cấp trong cuộc đấu tranh giai cấp"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 188,
+    "id": 294047693,
+    "question": "Quan điểm của nhà nước xã hội chủ nghĩa khi giải quyết vấn đề tôn giáo như thế nào?",
+    "options": [
+      {"key": "A", "text": "Tạo điều kiện cho cá nhân, tổ chức tôn giáo được phép xâm phạm vào quyền tự do tín ngưỡng tôn giáo của nhân dân"},
+      {"key": "B", "text": "Tôn trọng và bảo hộ các hoạt động của tôn giáo bình thường nhằm thỏa mãn nhu cầu tín ngưỡng của người dân"},
+      {"key": "C", "text": "Ngăn cản tự do theo đạo, đổi đạo, bỏ đạo"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 189,
+    "id": 294047694,
+    "question": "Đâu không phải là quan điểm của nhà nước xã hội chủ nghĩa trong việc giải quyết vấn đề tôn giáo?",
+    "options": [
+      {"key": "A", "text": "Tôn trọng và bảo hộ các hoạt động tôn giáo bình thường nhằm thỏa mãn nhu cầu tín ngưỡng của người dân"},
+      {"key": "B", "text": "Ngăn cản tự do theo đạo, đổi đạo, bỏ đạo hoặc đe dọa, bắt buộc người dân phải theo đạo"},
+      {"key": "C", "text": "Không cho bất cứ ai can xâm phạm quyền tự do tín ngưỡng tôn giáo của nhân dân"},
+      {"key": "D", "text": "Không cấm đoán nhu cầu tín ngưỡng tôn giáo của người dân"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 190,
+    "id": 294047695,
+    "question": "Nguyên tắc tôn trọng, bảo đảm quyền tự do tín ngưỡng và không tín ngưỡng của nhân dân được hiểu như thế nào?",
+    "options": [
+      {"key": "A", "text": "Cá nhân, tổ chức, chức sắc tôn giáo, tổ chức giáo hội được quyền can thiệp vào việc theo đạo, đổi đạo của người dân"},
+      {"key": "B", "text": "Nhà nước ngăn cản tự do theo đạo, đổi đạo, bỏ đạo của người dân"},
+      {"key": "C", "text": "Nhà nước cấm đoán nhu cầu tín ngưỡng của người dân"},
+      {"key": "D", "text": "Nhà nước tôn trọng và bảo hộ các hoạt động tôn giáo bình thường nhằm thỏa mãn nhu cầu tín ngưỡng của người dân"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 191,
+    "id": 294047696,
+    "question": "Theo chủ nghĩa Mác- Lênin, việc khắc phục những ảnh hưởng tiêu cực của tôn giáo phải gắn liền với quá trình cải tạo xã hội cũ, xây dựng xã hội mới như thế nào?",
+    "options": [
+      {"key": "A", "text": "Là một quá trình lâu dài"},
+      {"key": "B", "text": "Chỉ cần diễn ra trong thời gian ngắn"},
+      {"key": "C", "text": "Dựa trên mối quan hệ ý thức xã hội quyết định tồn tại xã hội"},
+      {"key": "D", "text": "Cần tách biệt khỏi mối quan hệ giữa tồn tại xã hội và ý thức xã hội"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 192,
+    "id": 294047697,
+    "question": "Theo chủ nghĩa Mác- Lênin, việc khắc phục những ảnh hưởng tiêu cực của tôn giáo phải gắn liền với quá trình cải tạo xã hội cũ, xây dựng xã hội mới phải dựa trên mối quan hệ nào?",
+    "options": [
+      {"key": "A", "text": "Tồn tại xã hội quyết định ý thức xã hội"},
+      {"key": "B", "text": "Ý thức xã hội quyết định tồn tại xã hội"},
+      {"key": "C", "text": "Tôn giáo là nền tảng quan trọng nhất quyết định sự phát triển của xã hội"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 193,
+    "id": 294047698,
+    "question": "Theo chủ nghĩa Mác- Lênin, mặt chính trị của tôn giáo biểu hiện ở nội dung nào?",
+    "options": [
+      {"key": "A", "text": "Thể hiện sự tín ngưỡng, niềm tin trong tôn giáo"},
+      {"key": "B", "text": "Là sự lợi dụng tôn giáo của những phần tử phản động nhằm chống lại sự nghiệp cách mạng"},
+      {"key": "C", "text": "Là niềm tin giữa những người có tín ngưỡng, tôn giáo và những người không theo tôn giáo"},
+      {"key": "D", "text": "Là niềm tin giữa những người có tín ngưỡng, tôn giáo khác nhau"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 194,
+    "id": 294047699,
+    "question": "Theo chủ nghĩa Mác- Lênin, mặt tư tưởng của tôn giáo biểu hiện như thế nào?",
+    "options": [
+      {"key": "A", "text": "Biểu hiện sự khác nhau về niềm tin tôn giáo giữa những người có tín ngưỡng tôn giáo và những người không theo tôn giáo, những người có tín ngưỡng, tôn giáo khác nhau"},
+      {"key": "B", "text": "Là sự lợi dụng tôn giáo của những phần tử phản động nhằm chống lại sự nghiệp cách mạng chân chính"},
+      {"key": "C", "text": "Là sự lợi dụng tôn giáo của những phần tử phản động nhằm chống lại lợi ích của nhân dân lao động"},
+      {"key": "D", "text": "Các giai cấp bóc lột thường lợi dụng tôn giáo để phục vụ lợi ích chính trị của mình"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 195,
+    "id": 294047700,
+    "question": "Ở Việt Nam, những tôn giáo nào tôn giáo du nhập từ bên ngoài?",
+    "options": [
+      {"key": "A", "text": "Phật giáo, Cao Đài, Hòa Hảo, Công giáo"},
+      {"key": "B", "text": "Phật giáo, Công giáo, Hồi giáo, Tin lành"},
+      {"key": "C", "text": "Phật giáo, Tin lành, Cao Đài, Công giáo"},
+      {"key": "D", "text": "Phật giáo, Công giáo, Hồi giáo, Hòa Hảo"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 196,
+    "id": 294047701,
+    "question": "Ở Việt Nam, ở những tôn giáo nào là tôn giáo nội sinh?",
+    "options": [
+      {"key": "A", "text": "Cao Đài, Hòa Hảo"},
+      {"key": "B", "text": "Phật giáo, Cao Đài"},
+      {"key": "C", "text": "Công giáo, Hòa Hảo"},
+      {"key": "D", "text": "Phật giáo, Công giáo, Tin lành"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 197,
+    "id": 294047702,
+    "question": "Đặc điểm của các tôn giáo khi du nhập vào Việt Nam là gì?",
+    "options": [
+      {"key": "A", "text": "Không chịu ảnh hưởng của bản sắc văn hóa Việt Nam"},
+      {"key": "B", "text": "Chịu ảnh hưởng của bản sắc văn hóa Việt Nam"},
+      {"key": "C", "text": "Không có vai trò đối với đời sống tin thần của người dân"},
+      {"key": "D", "text": "Nó có vai trò quyết định nhất đối với đời sống tinh thần của người dân"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 198,
+    "id": 294047703,
+    "question": "Tìm phương án trả lời sai?",
+    "options": [
+      {"key": "A", "text": "Việt Nam là một quốc gia có nhiều tôn giáo"},
+      {"key": "B", "text": "Tôn giáo ở Việt Nam tồn tại đa dạng và đan xen với nhau"},
+      {"key": "C", "text": "Tín đồ các tôn giáo Việt Nam phần lớn là nhân dân lao động, có lòng yêu nước và có tinh thần dân tộc"},
+      {"key": "D", "text": "Tôn giáo ở Việt Nam không đa dạng và thường xuyên có chiến tranh tôn giáo"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 199,
+    "id": 294047704,
+    "question": "Đặc điểm của hàng ngũ chức sắc các tôn giáo ở Việt Nam như thế nào?",
+    "options": [
+      {"key": "A", "text": "Là các tín đồ có chức vụ, sắc phẩm trong tôn giáo"},
+      {"key": "B", "text": "Có chức năng là truyền bá, thực hành giáo lý, giáo luật, lễ nghi…"},
+      {"key": "C", "text": "Quản lý tổ chức của tôn giáo, duy trì, phát triển tôn giáo, chăm lo đến đời sống tín đồ"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 200,
+    "id": 294047705,
+    "question": "Đặc điểm của hàng ngũ chức sắc các tôn giáo ở Việt Nam như thế nào?",
+    "options": [
+      {"key": "A", "text": "Có chức năng là truyền bá, thực hành giáo lý, giáo luật, quản lý tổ chức của tôn giáo… chăm lo đến đời sống tâm linh của tín đồ"},
+      {"key": "B", "text": "Không chịu sự tác động của tình hình chính trị - xã hội"},
+      {"key": "C", "text": "Xu hướng tiến bộ trong hàng ngũ chức sắc ngày càng giảm đi"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 201,
+    "id": 294047706,
+    "question": "Tìm phương án sai, hàng ngũ chức sắc các tôn giáo ở Việt Nam có đặc điểm:",
+    "options": [
+      {"key": "A", "text": "Có chức năng là truyền bá, thực hành giáo lý, giáo luật, quản lý tổ chức của tôn giáo… chăm lo đến đời sống tâm linh của tín đồ"},
+      {"key": "B", "text": "Luôn chịu sự tác động của tình hình chính trị - xã hội"},
+      {"key": "C", "text": "Là tín đồ có chức vụ, phẩm sắc trong tôn giáo"},
+      {"key": "D", "text": "Nhìn chung xu hướng tiến bộ trong hàng ngũ chức sắc ngày càng giảm"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 202,
+    "id": 294047707,
+    "question": "Do các tôn giáo ở Việt Nam có quan hệ với các tổ chức, cá nhân tôn giáo ở nước ngoài nên chính sách giải quyết tôn giáo của Đảng và nhà nước ta phải:",
+    "options": [
+      {"key": "A", "text": "Đảm bảo kết hợp giữa mở rộng giao lưu quốc tế với việc bảo đảm độc lập, chủ quyền"},
+      {"key": "B", "text": "Cho các tổ chức chính trị nước ngoài can thiệp sâu vào vấn đề tôn giáo ở nước ta"},
+      {"key": "C", "text": "Cho các tổ chức tôn giáo ở nước ngoài can thiệp sâu vào vấn đề tôn giáo ở nước ta"},
+      {"key": "D", "text": "Kìm hãm khắt khe việc mở rộng ngoại giao của tôn giáo ở Việt Nam với tôn giáo ở nước ngoài"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 203,
+    "id": 294047708,
+    "question": "Nội dung cơ bản trong chính sách của Đảng, Nhà nước Việt Nam đối với tín ngưỡng, tôn giáo hiện nay là gì?",
+    "options": [
+      {"key": "A", "text": "Tín ngưỡng, tôn giáo đang và sẽ tồn tại cùng dân tộc trong quá trình xây dựng chủ nghĩa xã hội ở nước ta"},
+      {"key": "B", "text": "Chỉ bằng các biện pháp hành chính, hay khi đời sống vật chất được đảm bảo, trình độ dân trí cao có thể làm cho tín ngưỡng, tôn giáo mất đi"},
+      {"key": "C", "text": "Tín ngưỡng, tôn giáo là hiện tượng bất biến, thoát ly với mọi cơ sở kinh tế- xã hội, thể chế chính trị"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 204,
+    "id": 294047709,
+    "question": "Nội dung trong chính sách đoàn kết tôn giáo của nhà nước ta là:",
+    "options": [
+      {"key": "A", "text": "Đoàn kết đồng bào theo các tôn giáo khác nhau"},
+      {"key": "B", "text": "Đoàn kết đồng bào theo tôn giáo và đồng bào không theo tôn giáo"},
+      {"key": "C", "text": "Nghiếm cấm mọi hành vi chia rẽ, phân biệt đối xử với công dân vì lý do tín ngưỡng tôn giáo"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 205,
+    "id": 294047710,
+    "question": "Nội dung trong chính sách đoàn kết tôn giáo của nhà nước ta là:",
+    "options": [
+      {"key": "A", "text": "Chỉ thực hiện đoàn kết đồng bào trong cùng một tôn giáo"},
+      {"key": "B", "text": "Chỉ thực hiện đoàn kết giữa đồng bào các tôn giáo với nhau"},
+      {"key": "C", "text": "Nghiêm cấm mọi hành vi chia rẽ, phân biệt đối xử với công dân vì lý do tín ngưỡng tôn giáo"},
+      {"key": "D", "text": "Tất cả các đáp án"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 206,
+    "id": 294047711,
+    "question": "Gia đình được hình thành bởi hai mối quan hệ cơ bản đó là...",
+    "options": [
+      {"key": "A", "text": "quan hệ họ hàng và quan hệ huyết thống"},
+      {"key": "B", "text": "quan hệ hôn nhân và quan hệ họ hàng"},
+      {"key": "C", "text": "quan hệ hôn nhân và quan hệ huyết thống"},
+      {"key": "D", "text": "quan hệ huyết thống và quan hệ xã hội"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 207,
+    "id": 294047712,
+    "question": "Quan hệ nền tảng hình thành nên các mối quan hệ khác trong gia đình, là cơ sở pháp lý cho sự tồn tại của mỗi gia đình đó là quan hệ...",
+    "options": [
+      {"key": "A", "text": "hôn nhân"},
+      {"key": "B", "text": "huyết thống"},
+      {"key": "C", "text": "họ hàng"},
+      {"key": "D", "text": "xã hội"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 208,
+    "id": 294047713,
+    "question": "Quan hệ giữa những người có cùng một dòng máu nảy sinh từ quan hệ hôn nhân là quan hệ...",
+    "options": [
+      {"key": "A", "text": "họ hàng"},
+      {"key": "B", "text": "Họ tộc"},
+      {"key": "C", "text": "Gia đình"},
+      {"key": "D", "text": "huyết thống"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 209,
+    "id": 294047714,
+    "question": "Mối quan hệ tự nhiên, là yếu tố mạnh mẽ nhất gắn kết các thành viên trong gia đình với nhau đó là quan hệ...",
+    "options": [
+      {"key": "A", "text": "tình cảm"},
+      {"key": "B", "text": "kinh tế"},
+      {"key": "C", "text": "huyết thống"},
+      {"key": "D", "text": "hôn Nhân"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 210,
+    "id": 294047715,
+    "question": "Quan hệ hôn nhân còn được gọi là quan hệ giữa...",
+    "options": [
+      {"key": "A", "text": "hai gia đình nhà trai và nhà gái"},
+      {"key": "B", "text": "vợ và chồng"},
+      {"key": "C", "text": "những người được pháp luật thừa nhận"},
+      {"key": "D", "text": "những người cùng chung sống trong một gia đình"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 211,
+    "id": 294047716,
+    "question": "Quan hệ huyết thống trong gia đình chính là quan hệ giữa...",
+    "options": [
+      {"key": "A", "text": "cha mẹ và con cái"},
+      {"key": "B", "text": "những người có họ hàng với nhau"},
+      {"key": "C", "text": "những người chung một dòng họ"},
+      {"key": "D", "text": "những người trong một gia đình"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 212,
+    "id": 294047717,
+    "question": "Nghĩa vụ, quyền lợi và trách nhiệm của mỗi thành viên trong gia đình được quy định bởi...",
+    "options": [
+      {"key": "A", "text": "đạo đức xã hội"},
+      {"key": "B", "text": "pháp luật của mỗi quốc gia"},
+      {"key": "C", "text": "pháp lý và đạo lý"},
+      {"key": "D", "text": "nền nếp gia đình"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 213,
+    "id": 294047718,
+    "question": "Quan hệ giữa cha mẹ nuôi và con nuôi chỉ được pháp luật công nhận khi...",
+    "options": [
+      {"key": "A", "text": "công bố rộng rãi với mọi người xung quanh"},
+      {"key": "B", "text": "có đầy đủ thủ tục pháp lý"},
+      {"key": "C", "text": "đã làm lễ gia tiên báo cáo với họ hàng"},
+      {"key": "D", "text": "cả hai bên cha mẹ nuôi và con nuôi có nhu cầu sống cùng nhau"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 214,
+    "id": 294047719,
+    "question": "Một cộng đồng người sống chung trong một không gian xác định thường được sử dụng ở góc độ quản lý nhân khẩu là nội dung thể hiện khái niệm...",
+    "options": [
+      {"key": "A", "text": "hộ gia đình"},
+      {"key": "B", "text": "gia đình"},
+      {"key": "C", "text": "dòng họ"},
+      {"key": "D", "text": "dân tộc"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 215,
+    "id": 294047720,
+    "question": "Gia đình tập thể là hình thức gia đình tồn tại trong hình thái kinh tế xã hội..",
+    "options": [
+      {"key": "A", "text": "cộng sản nguyên thủy"},
+      {"key": "B", "text": "phong kiến"},
+      {"key": "C", "text": "tư bản chủ nghĩa"},
+      {"key": "D", "text": "cộng sản chủ nghĩa"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 216,
+    "id": 294047721,
+    "question": "Gia đình mà những người chồng sống theo chế độ nhiều vợ và vợ của họ cũng sống theo chế độ nhiều chồng con cái là con chung của cả hai bên là đặc trưng của...",
+    "options": [
+      {"key": "A", "text": "gia đình hạt nhân"},
+      {"key": "B", "text": "gia đình nhiều thế hệ"},
+      {"key": "C", "text": "gia đình tập thể"},
+      {"key": "D", "text": "gia đình cá thể"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 217,
+    "id": 294047722,
+    "question": "Trong hình thức gia đình tập thể, việc xác định dòng dõi chủ yếu dựa vào...",
+    "options": [
+      {"key": "A", "text": "huyết thống của bố"},
+      {"key": "B", "text": "huyết thống của mẹ"},
+      {"key": "C", "text": "huyết thống của cả bố và mẹ"},
+      {"key": "D", "text": "huyết thống của tất cả những người bố và tất cả những người mẹ trong gia đình"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 218,
+    "id": 294047723,
+    "question": "Quyền thừa kế tài sản trong gia đình tập thể căn cứ vào huyết thống của người mẹ bởi vì..",
+    "options": [
+      {"key": "A", "text": "mẹ là người sinh ra con cái"},
+      {"key": "B", "text": "người phụ nữ có địa vị cao nhất trong gia đình"},
+      {"key": "C", "text": "người phụ nữ rất được tôn trọng"},
+      {"key": "D", "text": "không biết chính xác ai là cha đẻ của đứa con"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 219,
+    "id": 294047724,
+    "question": "Đặc điểm nổi bật của gia đình tập thể là...",
+    "options": [
+      {"key": "A", "text": "phụ quyền dựa trên cơ sở kinh tế tập thể kinh tế gia đình cộng sản"},
+      {"key": "B", "text": "phụ quyền dựa trên cơ sở kinh tế tư nhân"},
+      {"key": "C", "text": "mẫu quyền dựa trên cơ sở kinh tế tập thể gia đình cộng sản"},
+      {"key": "D", "text": "mẫu quyền dựa trên cơ sở kinh tế cá nhân"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 220,
+    "id": 294047725,
+    "question": "sự xuất hiện của chế độ tư hữu và lao động của nam giới ngày càng được đề cao trong xã hội là nguyên nhân dẫn tới...",
+    "options": [
+      {"key": "A", "text": "gia đình tập thể"},
+      {"key": "B", "text": "gia đình cá thể"},
+      {"key": "C", "text": "gia đình nhiều thế hệ"},
+      {"key": "D", "text": "gia đình hai thế hệ"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 221,
+    "id": 294047726,
+    "question": "Theo quan điểm của C.Mác và Ph.Ăngghen, gia đình một vợ một chồng dựa trên quyền thống trị của người chồng nhằm chủ đích là làm cho con cái sinh ra phải có cha đẻ rõ ràng không ai tranh cãi được và sự rõ ràng ấy là cần thiết vì những người con đó sau này sẽ được hưởng tài sản của cha với tư cách là...",
+    "options": [
+      {"key": "A", "text": "người con chính thống"},
+      {"key": "B", "text": "người con nối dõi"},
+      {"key": "C", "text": "người thừa kế trực tiếp"},
+      {"key": "D", "text": "người thừa kế gián tiếp"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 222,
+    "id": 294047727,
+    "question": "Nội dung nào dưới đây không phản ánh đúng vị trí của gia đình trong xã hội...",
+    "options": [
+      {"key": "A", "text": "gia đình là tế bào của xã hội"},
+      {"key": "B", "text": "gia đình là tổ ấm của mỗi thành viên"},
+      {"key": "C", "text": "gia đình là cầu nối giữa cá nhân với xã hội"},
+      {"key": "D", "text": "gia đình là bộ phận của làng xã"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 223,
+    "id": 294047728,
+    "question": "Nhận định nào dưới đây thể hiện đúng nhất vị trí của gia đình đối với sự vận động và phát triển của xã hội...",
+    "options": [
+      {"key": "A", "text": "gia đình có vai trò quan trọng đối với sự tồn tại vận động và phát triển của xã hội"},
+      {"key": "B", "text": "gia đình có vai trò quyết định đối với sự tồn tại vận động và phát triển của xã hội"},
+      {"key": "C", "text": "gia đình có vai trò không nhỏ đối với sự tồn tại vận động và phát triển của xã hội"},
+      {"key": "D", "text": "gia đình có vai trò nhất định đối với sự tồn tại vận động và phát triển của xã hội"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 224,
+    "id": 294047729,
+    "question": "Gia đình không chỉ sản xuất ra tư liệu sinh hoạt mà còn sản xuất ra...",
+    "options": [
+      {"key": "A", "text": "bản thân con người"},
+      {"key": "B", "text": "các mối quan hệ xã hội"},
+      {"key": "C", "text": "các giá trị kinh tế"},
+      {"key": "D", "text": "các giá trị tinh thần"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 225,
+    "id": 294047730,
+    "question": "Gia đình như một tế bào tự nhiên là đơn vị cơ sở để tạo nên cơ thể xã hội vì...",
+    "options": [
+      {"key": "A", "text": "gia đình sản xuất ra tư liệu tiêu dùng tư liệu sản xuất và các mối quan hệ xã hội khác"},
+      {"key": "B", "text": "gia đình sản xuất ra tư liệu sản xuất tái sản xuất ra con người và các mối quan hệ xã hội khác"},
+      {"key": "C", "text": "gia đình sản xuất ra tư liệu tiêu dùng, tư liệu sản xuất, tái sản xuất ra con người"},
+      {"key": "D", "text": "gia đình tái sản xuất ra con người và các mối quan hệ xã hội"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 226,
+    "id": 294047731,
+    "question": "Chủ tịch Hồ Chí Minh đã từng khẳng định, hạt nhân của xã hội chính là...",
+    "options": [
+      {"key": "A", "text": "các thành viên trong gia đình"},
+      {"key": "B", "text": "các hộ gia đình"},
+      {"key": "C", "text": "hộ gia đình"},
+      {"key": "D", "text": "gia đình"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 227,
+    "id": 294047732,
+    "question": "Môi trường tốt nhất để mỗi cá nhân được yêu thương, nuôi dưỡng, chăm sóc, trưởng thành phát triển là...",
+    "options": [
+      {"key": "A", "text": "gia đình"},
+      {"key": "B", "text": "Nhà trường"},
+      {"key": "C", "text": "dòng họ"},
+      {"key": "D", "text": "gia đình"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 228,
+    "id": 294047733,
+    "question": "Cộng đồng xã hội đầu tiên đáp ứng nhu cầu quan hệ xã hội của mỗi cá nhân là...",
+    "options": [
+      {"key": "A", "text": "làng xóm"},
+      {"key": "B", "text": "trường học"},
+      {"key": "C", "text": "họ hàng"},
+      {"key": "D", "text": "gia đình"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 229,
+    "id": 294047734,
+    "question": "Nội dung nào dưới đây KHÔNG là chức năng cơ bản của gia đình...",
+    "options": [
+      {"key": "A", "text": "tái sản xuất ra con người"},
+      {"key": "B", "text": "nuôi dưỡng giáo dục"},
+      {"key": "C", "text": "xây dựng quy định của địa phương"},
+      {"key": "D", "text": "kinh tế và tổ chức tiêu dùng"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 230,
+    "id": 294047735,
+    "question": "Chức năng đặc thù của gia đình không một cộng đồng nào có thể thay thế là...",
+    "options": [
+      {"key": "A", "text": "nuôi dưỡng giáo dục"},
+      {"key": "B", "text": "tái sản xuất ra con người"},
+      {"key": "C", "text": "kinh tế và tổ chức tiêu dùng"},
+      {"key": "D", "text": "thỏa mãn nhu cầu tâm sinh lý duy trì tình cảm gia đình"}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 231,
+    "id": 294047736,
+    "question": "Không chỉ đáp ứng nhu cầu tâm sinh lý tự nhiên của con người đáp ứng nhu cầu nòi giống của gia đình dòng họ mà còn đáp ứng nhu cầu về sức lao động và duy trì sự trường tồn của xã hội là nội dung thể hiện chức năng nào của gia đình...",
+    "options": [
+      {"key": "A", "text": "thỏa mãn nhu cầu tâm sinh lý duy trì tình cảm gia đình"},
+      {"key": "B", "text": "kinh tế và tổ chức tiêu dùng"},
+      {"key": "C", "text": "tái sản xuất ra con người"},
+      {"key": "D", "text": "nuôi dưỡng giáo dục"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 232,
+    "id": 294047737,
+    "question": "Việc thực hiện chức năng tái sản xuất ra con người không chỉ là việc riêng của gia đình mà là vấn đề xã hội vì thực hiện chức năng này quyết định...",
+    "options": [
+      {"key": "A", "text": "quy mô dân số, mật độ dân cư, chất lượng cuộc sống người lao động"},
+      {"key": "B", "text": "tỷ lệ gia tăng dân số chất lượng nguồn lao động của mỗi quốc gia"},
+      {"key": "C", "text": "quy mô dân số, mật độ dân cư, chất lượng nguồn lao động"},
+      {"key": "D", "text": "mật độ dân cư, chất lượng nguồn lao động của mỗi quốc gia"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 233,
+    "id": 294047738,
+    "question": "Chức năng nào dưới đây thể hiện tình cảm thiêng liêng trách nhiệm của cha mẹ với con cái đồng thời thể hiện trách nhiệm của gia đình với xã hội...",
+    "options": [
+      {"key": "A", "text": "thỏa mãn nhu cầu tâm sinh lý duy trì tình cảm gia đình"},
+      {"key": "B", "text": "kinh tế và tổ chức tiêu dùng"},
+      {"key": "C", "text": "tái sản xuất ra con người"},
+      {"key": "D", "text": "nuôi dưỡng giáo dục"}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 234,
+    "id": 294047739,
+    "question": "Chức năng nào dưới đây của gia đình có ý nghĩa rất quan trọng tới việc hình thành nhân cách đạo đức lối sống của mỗi người...",
+    "options": [
+      {"key": "A", "text": "nuôi dưỡng giáo dục"},
+      {"key": "B", "text": "thỏa mãn nhu cầu tâm sinh lý duy trì tình cảm gia đình"},
+      {"key": "C", "text": "kinh tế và tổ chức tiêu dùng"},
+      {"key": "D", "text": "tái sản xuất ra con người"}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 235,
+    "id": 294047740,
+    "question": "Gia đình thực hiện chức năng nào dưới đây để góp phần to lớn vào việc đào tạo thế hệ trẻ nâng cao chất lượng nguồn lao động...",
+    "options": [
+      {"key": "A", "text": "thỏa mãn nhu cầu tâm sinh lý duy trì tình cảm gia đình"},
+      {"key": "B", "text": "kinh tế và tổ chức tiêu dùng"},
+      {"key": "C", "text": "nuôi dưỡng, giáo dục"},
+      {"key": "D", "text": "tái sản xuất ra con người"}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 236,
+    "id": 294047741,
+    "question": "Thực hiện chức năng nào dưới đây của gia đình đòi hỏi cha mẹ phải có kiến thức cơ bản, tương đối toàn diện về mọi mặt?",
+    "options": [
+      {"key": "A", "text": "Thoả mãn nhu cầu tâm, sinh lí, duy trì tình cảm gia đình."},
+      {"key": "B", "text": "Kinh tế và tổ chức tiêu dừng."},
+      {"key": "C", "text": "Tái sản xuất ra con người."},
+      {"key": "D", "text": "Nuôi dưỡng, giáo dục."}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 237,
+    "id": 294047742,
+    "question": "Xét ở chức năng kinh tế và tổ chức tiêu dùng, gia đình có đặc thù nào dưới đây mà các đơn vị kinh tế khác không có được?",
+    "options": [
+      {"key": "A", "text": "Tham gia trực tiếp vào quá trình sản xuất, tái sản xuất ra tư liệu lao động."},
+      {"key": "B", "text": "Tham gia vào quá trình sản xuất và tái sản xuất ra sức lao động."},
+      {"key": "C", "text": "Tham gia trực tiếp vào quá trình sản xuất, tái sản xuất ra tư liệu sản xuất."},
+      {"key": "D", "text": "Tham gia trực tiếp vào quá trình sản xuất, tái sản xuất ra tư liệu tiêu dùng."}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 238,
+    "id": 294047743,
+    "question": "Việc sử dụng hợp lí các khoản thu nhập vào việc đảm bảo đời sống vật chất và tinh thần của mỗi thành viên, cùng với việc sử dụng quỹ thời gian rảnh rỗi để tạo nên đời sống tinh thần, thể chất lành manh là nội dung của chức năng...",
+    "options": [
+      {"key": "A", "text": "tổ chức tiêu dùng của gia đình."},
+      {"key": "B", "text": "tổ chức sản xuất của gia đình."},
+      {"key": "C", "text": "tổ chức đời sống tinh thần của gia đình."},
+      {"key": "D", "text": "tổ chức các mối quan hệ xã hội của gia đình."}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 239,
+    "id": 294047744,
+    "question": "Gia đình đảm bảo nguồn sống, đáp ứng nhu cầu vật chất, tinh thần của các thành viên trong gia đình là nội dung của chức năng...",
+    "options": [
+      {"key": "A", "text": "đảm bảo đời sống vật chất và tinh thần."},
+      {"key": "B", "text": "kinh tế và tổ chức tiêu dùng."},
+      {"key": "C", "text": "thoả mãn mọi mặt đời sống gia đình."},
+      {"key": "D", "text": "nuôi dưỡng, giáo dục."}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 240,
+    "id": 294047745,
+    "question": "Chức năng nào dưới đây tạo cho gia đình cơ cơ sở để tổ chức tốt đời sống, nuôi dạy con cái, đóng góp to lớn đối với sự phát triển xã hội?",
+    "options": [
+      {"key": "A", "text": "Đảm bảo đời sống gia đình và phát triển xã hội."},
+      {"key": "B", "text": "Thoả mãn nhu cầu tâm - sinh lí, duy trì tình cảm gia đình."},
+      {"key": "C", "text": "Nuôi dưỡng, giáo dục."},
+      {"key": "D", "text": "Kinh tế và tổ chức tiêu dùng."}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 241,
+    "id": 294047746,
+    "question": "Chức năng nào dưới đây của gia đình có nhiệm vụ thoả mãn nhu cầu tình cảm, văn hoá, tinh thần cho các thành viên, đảm bảo sự cân bằng tâm lí, bảo vệ chăm sóc sức khoẻ người ốm, người già, trẻ em?",
+    "options": [
+      {"key": "A", "text": "Thoả mãn nhu cầu tâm - sinh lí"},
+      {"key": "B", "text": "Thoả mãn nhu cầu tình cảm, đời sống vật chất."},
+      {"key": "C", "text": "Thoả mãn nhu cầu tâm - sinh lí, duy trì tình cảm gia đình."},
+      {"key": "D", "text": "Thoả mãn đời sống vật chất và tinh thần."}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 242,
+    "id": 294047747,
+    "question": "Cơ sở kinh tế - xã hội để xây dựng gia đình trong thời kì quá độ lên chủ nghĩa xã hội là sự phát triển của...",
+    "options": [
+      {"key": "A", "text": "lực lượng sản xuất và quan hệ sản xuất xã hội chủ nghĩa."},
+      {"key": "B", "text": "nền kinh tế nhiều thành phần, định hướng xã hội chủ nghĩa."},
+      {"key": "C", "text": "nền kinh tế thị trường định hướng xã hội chủ nghĩa."},
+      {"key": "D", "text": "lực lượng sản xuất gắn với công cụ lao động hiện đại."}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 243,
+    "id": 294047748,
+    "question": "Ý nào dưới đây là nguyên nhân sâu xa gây nên tình trạng thống trị của người đàn ông trong gia đình, sự bất bình đẳng nam nữ, giữa vợ và chồng, sự nô dịch với phụ nữ?",
+    "options": [
+      {"key": "A", "text": "Chế độ công hữu về tư liệu sản xuất."},
+      {"key": "B", "text": "Chế độ đa thê."},
+      {"key": "C", "text": "Chế độ tư hữu về tư liệu sản xuất."},
+      {"key": "D", "text": "Chế độ một vợ một chồng."}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 244,
+    "id": 294047749,
+    "question": "Sự thống trị của người đàn ông trong gia đình là kết quả của...",
+    "options": [
+      {"key": "A", "text": "sự thống trị của họ về kinh tế."},
+      {"key": "B", "text": "sự thống trị của họ về văn hoá."},
+      {"key": "C", "text": "những quy định trong gia đình."},
+      {"key": "D", "text": "những hủ tục lạc hậu."}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 245,
+    "id": 294047750,
+    "question": "Việc thiết lập chính quyền nhà nước của giai cấp công nhân và nhân dân lao động nhằm xây dựng gia đình trong thời kì quá độ lên chủ nghĩa xã hội là nội dung của cơ sở...",
+    "options": [
+      {"key": "A", "text": "văn hoá."},
+      {"key": "B", "text": "chính trị."},
+      {"key": "C", "text": "xã hội."},
+      {"key": "D", "text": "kinh tế."}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 246,
+    "id": 294047751,
+    "question": "Ở Việt Nam, tổ chức nào dưới đây là công cụ hữu hiệu nhất xoá bỏ những hủ tục lạc hậu, giải phóng phụ nữ và bảo vệ hạnh phúc gia đình?",
+    "options": [
+      {"key": "A", "text": "Đảng Cộng sản."},
+      {"key": "B", "text": "Hội Liên hiệp Phụ nữ."},
+      {"key": "C", "text": "Đoàn Thanh niên Cộng sản."},
+      {"key": "D", "text": "Nhà nước."}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 247,
+    "id": 294047752,
+    "question": "Nội dung nào dưới đây thể hiện rõ nhất vai trò của nhà nước xã hội chủ nghĩa trong việc đảm bảo lợi ích công dân, lợi ích của các thành viên trong gia đinh, đảm bảo sự bình đẳng giới, chính sách dân số?",
+    "options": [
+      {"key": "A", "text": "Phát triển kinh tế."},
+      {"key": "B", "text": "Ổn định tình hình chính trị-xã hội."},
+      {"key": "C", "text": "Xây dựng hệ thống pháp luật và hệ thống chính sách xã hội."},
+      {"key": "D", "text": "Xây dựng hệ thống pháp luật và nâng cao đời sống tinh thần."}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 248,
+    "id": 294047753,
+    "question": "Phát triển lực lượng sản xuất và quan hệ sản xuất tương ứng - quan hệ sản xuất mới xã hội chủ nghĩa là cơ sở để xây dựng gia đình trong thời kì quá độ lên chủ nghĩa xã hội ở lĩnh vực nào dưới đây?",
+    "options": [
+      {"key": "A", "text": "Chính trị - xã hội."},
+      {"key": "B", "text": "Văn hoá."},
+      {"key": "C", "text": "Tâm lí."},
+      {"key": "D", "text": "Kinh tế - xã hội."}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 249,
+    "id": 294047754,
+    "question": "Hôn nhân tự nguyện, một vợ một chồng bình đẳng, được đảm bảo về pháp lí là biểu hiện của...",
+    "options": [
+      {"key": "A", "text": "chế độ hôn nhân tiến bộ."},
+      {"key": "B", "text": "hôn nhân được pháp luật thừa nhận."},
+      {"key": "C", "text": "hôn nhân tự nguyện."},
+      {"key": "D", "text": "hôn nhân bình đẳng."}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 250,
+    "id": 294047755,
+    "question": "Hôn nhân tự nguyện là hôn nhân xuất phát từ...",
+    "options": [
+      {"key": "A", "text": "tình yêu."},
+      {"key": "B", "text": "sự thoả mãn về kinh tế."},
+      {"key": "C", "text": "sự đồng ý của bố mẹ hai bên."},
+      {"key": "D", "text": "sự ủng hộ của những người xung quanh."}
+    ],
+    "answer": "A"
+  },
+  {
+    "number": 251,
+    "id": 294047756,
+    "question": "Nam nữ được đảm bảo quyền tự do trong việc lựa chọn người kết hôn là biểu hiện của...",
+    "options": [
+      {"key": "A", "text": "hôn nhân bình đẳng."},
+      {"key": "B", "text": "hôn nhân tự nguyện."},
+      {"key": "C", "text": "hôn nhân được pháp luật thừa nhận."},
+      {"key": "D", "text": "hôn nhân tích cực."}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 252,
+    "id": 294047757,
+    "question": "Nguyên nhân nào sau đây giữ vai trò quyết định nhất tới sự xuất hiện của hôn nhân một vợ một chồng trong lịch sử xã hội loài người?",
+    "options": [
+      {"key": "A", "text": "Sự thắng lợi của những tư tưởng tiến bộ."},
+      {"key": "B", "text": "Sự thắng lợi của chế độ tư hữu đối với chế độ công hữu nguyên thuỷ."},
+      {"key": "C", "text": "Sự xuất hiện của các tổ chức bảo vệ quyền lợi của người phụ nữ."},
+      {"key": "D", "text": "Vị trí, vai trò của người phụ nữ trong xã hội được thừa nhận."}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 253,
+    "id": 294047758,
+    "question": "Vợ và chồng đều có quyền lợi và nghĩa vụ như nhau về mọi vấn đề của cuộc sống gia đình là biểu hiện của...",
+    "options": [
+      {"key": "A", "text": "hôn nhân tự nguyện"},
+      {"key": "B", "text": "tình yêu."},
+      {"key": "C", "text": "vợ chồng bình đẳng."},
+      {"key": "D", "text": "tự do kết hôn."}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 254,
+    "id": 294047759,
+    "question": "Hôn nhân được đảm bảo về mặt pháp lí là hôn nhân...",
+    "options": [
+      {"key": "A", "text": "được tổ chức với sự chứng kiến của mọi người."},
+      {"key": "B", "text": "tự nguyện trên cơ sở tình yêu nam nữ."},
+      {"key": "C", "text": "được hai bên gia đình đồng ý."},
+      {"key": "D", "text": "được pháp luật thừa nhận thông qua việc đăng kí kết hôn."}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 255,
+    "id": 294047760,
+    "question": "Yếu tố nào dưới đây giữ vai trò quyết định tới việc thúc đẩy tăng trưởng về kinh tế, tăng thu nhập của cá nhân, là cơ sở cho việc củng cố và duy trì bền vững của gia đình ở Việt Nam?",
+    "options": [
+      {"key": "A", "text": "Trình độ dân trí ngày càng được nâng cao, nghề nghiệp ngày càng đa dạng."},
+      {"key": "B", "text": "Tình cảm gắn bó giữa các thành viên trong gia đình, mọi người đều có công việc ổn định."},
+      {"key": "C", "text": "Nền kinh tế thị trường định hướng xã hội chủ nghĩa ngày càng phát triển."},
+      {"key": "D", "text": "Con cái được học hành đầy đủ, các thành viên đều được tạo điều kiện phát triển, cơ hội việc làm ngày càng cao."}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 256,
+    "id": 294047761,
+    "question": "Biểu hiện nào dưới đây không là tác động tiêu cực của kinh tế thị trường định hướng xã hội chủ nghĩa tới gia đình ở Việt Nam?",
+    "options": [
+      {"key": "A", "text": "Sự phân hoá giàu nghèo giữa các gia đình ngày càng tăng."},
+      {"key": "B", "text": "Tăng thu nhập của cá nhân trong gia đình."},
+      {"key": "C", "text": "Ngoại tình, li hôn có chiều hướng ngày càng phát triển."},
+      {"key": "D", "text": "Trẻ em nghỉ học sớm, tham gia vào thị trường lao động."}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 257,
+    "id": 294047762,
+    "question": "Nội dung nào dưới đây là mục tiêu về xây dựng gia đình mà Đại hội đại biểu toàn quốc lần thứ XII của Đảng Cộng sản Việt Nam đã đề ra?",
+    "options": [
+      {"key": "A", "text": "Xây dựng gia đình hạnh phúc, kinh tế phát triển."},
+      {"key": "B", "text": "Xây dựng gia đình no ấm, tiến bộ, hạnh phúc, văn minh."},
+      {"key": "C", "text": "Xây dựng gia đình bình đẳng, hạnh phúc, no ấm, tiến bộ, văn minh."},
+      {"key": "D", "text": "Xây dựng gia đình ấm no, tự do, hạnh phúc."}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 258,
+    "id": 294047763,
+    "question": "Nội dung nào dưới đây là mục tiêu mà “Chiến lược phát triển gia đình Việt Nam đến năm 2020, tầm nhìn 2030” đã đề ra?",
+    "options": [
+      {"key": "A", "text": "Xây dựng gia đình Việt Nam kinh tế no ấm, văn minh, tiến bộ, hạnh phúc, thực sự là tổ ấm của mỗi người, là tế bào lành mạnh của xã hội."},
+      {"key": "B", "text": "Xây dựng gia đình Việt Nam bình đẳng, tiến bộ, hạnh phúc, thực sự là tổ ấm của mỗi người, là tế bào lành mạnh của xã hội."},
+      {"key": "C", "text": "Xây dựng gia đình Việt Nam no ấm, tiến bộ, hạnh phúc, thực sự là tổ ấm của mỗi người, là tế bào lành mạnh của xã hội."},
+      {"key": "D", "text": "Xây dựng gia đình Việt Nam no ấm, tiến bộ, hạnh phúc, thực sự là tổ ấm của mỗi người."}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 259,
+    "id": 294047764,
+    "question": "Ngày Gia đình Việt Nam là ngày...",
+    "options": [
+      {"key": "A", "text": "28/5."},
+      {"key": "B", "text": "26/6."},
+      {"key": "C", "text": "26/8."},
+      {"key": "D", "text": "28/6."}
+    ],
+    "answer": "D"
+  },
+  {
+    "number": 260,
+    "id": 294047765,
+    "question": "Luật Hôn nhân và Gia đình ban hành năm 2000 ở Việt Nam được sửa đổi vào năm...",
+    "options": [
+      {"key": "A", "text": "2007."},
+      {"key": "B", "text": "2012."},
+      {"key": "C", "text": "2014."},
+      {"key": "D", "text": "2015."}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 261,
+    "id": 294047766,
+    "question": "Luật Phòng, chống bạo lực gia đình hiện hành của Việt Nam có hiệu lực thi hành năm...",
+    "options": [
+      {"key": "A", "text": "2006."},
+      {"key": "B", "text": "2007."},
+      {"key": "C", "text": "2008."},
+      {"key": "D", "text": "2009."}
+    ],
+    "answer": "C"
+  },
+  {
+    "number": 262,
+    "id": 294047767,
+    "question": "“Gia đình đơn” còn được gọi bằng tên nào dưới đây?",
+    "options": [
+      {"key": "A", "text": "Gia đình tập thể."},
+      {"key": "B", "text": "Gia đình hạt nhân."},
+      {"key": "C", "text": "Gia đình ba thế hệ."},
+      {"key": "D", "text": "Gia đình nhiều thế hệ."}
+    ],
+    "answer": "B"
+  },
+  {
+    "number": 263,
+    "id": 294047768,
+    "question": "Gia đình có ba thế hệ cùng chung sống dưới một mái nhà được gọi là...",
+    "options": [
+      {"key": "A", "text": "gia đình tập thể."},
+      {"key": "B", "text": "tứ đại đồng đường."},
+      {"key": "C", "text": "tam đại đồng đường."},
+      {"key": "D", "text": "gia đình hạt nhân."}
+    ],
+    "answer": "C"
+  }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answered = false;
+    let autoNextTimeout = null;
+
+    const questionEl = document.getElementById('question');
+    const answersEl = document.getElementById('answers');
+    const progressEl = document.getElementById('progress');
+    const resultEl = document.getElementById('result');
+    const quizContainer = document.getElementById('quiz-container');
+    const soundCorrect = document.getElementById("sound-correct");
+    const soundWrong = document.getElementById("sound-wrong");
+
+    const optionKeys = ['A', 'B', 'C', 'D'];
+
+    /**
+     * Tải và hiển thị câu hỏi hiện tại
+     */
+    const loadQuestion = () => {
+        clearTimeout(autoNextTimeout);
+        answered = false;
+        resultEl.innerText = '';
+        answersEl.innerHTML = '';
+        quizContainer.focus();
+
+        const currentData = quizData[currentQuestionIndex];
+        
+        // Cập nhật câu hỏi và tiến trình
+        questionEl.innerText = `Câu ${currentQuestionIndex + 1}: ${currentData.question}`;
+        progressEl.innerText = `Câu ${currentQuestionIndex + 1} / ${quizData.length}`;
+
+        // Hiển thị các tùy chọn trả lời
+        currentData.options.forEach(option => {
+            // Chuẩn hóa key (a, b, c, d -> A, B, C, D)
+            const key = option.key.toUpperCase(); 
+
+            const btn = document.createElement('div');
+            btn.classList.add('answer-option', `answer-${key}`);
+            btn.setAttribute('tabindex', 0); // Có thể focus bằng phím
+            btn.setAttribute('role', 'button');
+
+            btn.innerHTML = `<span class="answer-label">${key}</span> ${option.text}`;
+
+            btn.onclick = () => selectAnswer(btn, key);
+            btn.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectAnswer(btn, key);
+                }
+            };
+
+            answersEl.appendChild(btn);
+        });
+    };
+
+    /**
+     * Xử lý khi người dùng chọn một câu trả lời
+     */
+    const selectAnswer = (btn, selectedKey) => {
+        if (answered) return;
+        answered = true;
+
+        // Vô hiệu hóa tất cả các tùy chọn khác
+        const allOptions = document.querySelectorAll('.answer-option');
+        allOptions.forEach(opt => opt.style.pointerEvents = 'none');
+
+        const correctKey = quizData[currentQuestionIndex].answer.toUpperCase();
+
+        if (selectedKey === correctKey) {
+            btn.classList.add('correct');
+            score++;
+            
+            // 🔊 Âm thanh đúng
+            if (soundCorrect) {
+                soundCorrect.currentTime = 0;
+                soundCorrect.play();
+            }
+        } else {
+            btn.classList.add('wrong');
+            
+            // 🔊 Âm thanh sai
+            if (soundWrong) {
+                soundWrong.currentTime = 0;
+                soundWrong.play();
+            }
+
+            // Tô màu đáp án đúng
+            allOptions.forEach(opt => {
+                const label = opt.querySelector('.answer-label');
+                if (label && label.innerText.trim() === correctKey) {
+                    opt.classList.add('correct');
+                }
+            });
+        }
+
+        resultEl.innerText = 'Nhấn **Enter** hoặc **Space** để sang câu tiếp theo...';
+
+        // Tự động chuyển câu sau 2 giây (có thể bị chặn bởi clearTimeout bên dưới)
+        // autoNextTimeout = setTimeout(goToNextQuestion, 2000);
+    };
+
+    /**
+     * Chuyển sang câu hỏi tiếp theo
+     */
+    const goToNextQuestion = () => {
+        clearTimeout(autoNextTimeout);
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    };
+
+    /**
+     * Quay lại câu hỏi trước đó
+     */
+    const goToPreviousQuestion = () => {
+        clearTimeout(autoNextTimeout);
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    };
+
+    /**
+     * Hiển thị kết quả cuối cùng
+     */
+    const showResult = () => {
+        questionEl.innerText = '🎉 Hoàn thành Bài Quiz!';
+        answersEl.innerHTML = '';
+        progressEl.innerText = `Điểm cuối cùng: ${score} / ${quizData.length}`;
+        
+        let message = `Bạn đã hoàn thành bài quiz! Điểm của bạn là **${score} / ${quizData.length}**.`;
+        if (score === quizData.length) {
+            message += ' **Tuyệt vời! Bạn đạt điểm tối đa!**';
+        } else if (score >= quizData.length * 0.7) {
+            message += ' **Rất tốt!**';
+        } else {
+            message += ' **Bạn hãy cố gắng hơn nhé!**';
+        }
+
+        resultEl.innerHTML = message;
+    };
+
+    // --- XỬ LÝ SỰ KIỆN BÀN PHÍM TOÀN CỤC ---
+    quizContainer.addEventListener('keydown', (e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && answered) {
+            e.preventDefault();
+            goToNextQuestion();
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            goToNextQuestion();
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            goToPreviousQuestion();
+        } 
+        
+        // Cho phép chọn đáp án bằng phím số khi chưa trả lời
+        if (!answered) {
+            const keyIndex = optionKeys.indexOf(e.key.toUpperCase());
+            if (keyIndex !== -1) {
+                e.preventDefault();
+                const options = document.querySelectorAll('.answer-option');
+                if (options[keyIndex]) {
+                    options[keyIndex].click(); // Giả lập click để chọn đáp án
+                }
+            }
+        }
+    });
+
+    // Bắt đầu quiz
+    loadQuestion();
+</script>
+</body>
+</html>
